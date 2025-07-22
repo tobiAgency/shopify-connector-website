@@ -1,9 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import requests
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 from typing import List, Dict, Any, Optional
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -21,6 +23,21 @@ app.add_middleware(
 SHOPIFY_SHOP_URL = os.getenv("SHOPIFY_SHOP_URL", "demo-shop.myshopify.com")
 SHOPIFY_ACCESS_TOKEN = os.getenv("SHOPIFY_ACCESS_TOKEN", "demo-token")
 SHOPIFY_API_VERSION = os.getenv("SHOPIFY_API_VERSION", "2023-10")
+
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
+security = HTTPBearer()
+
+class AdminLoginRequest(BaseModel):
+    password: str
+
+class AdminConfigRequest(BaseModel):
+    config: Dict[str, str]
+
+def verify_admin_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    if credentials.credentials != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid admin token")
+    return credentials
 
 def get_shopify_headers():
     return {
@@ -197,3 +214,56 @@ async def get_shop_info():
                 "country_name": "United States"
             }
         }
+
+@app.post("/api/admin/login")
+async def admin_login(request: AdminLoginRequest):
+    """Admin login endpoint"""
+    if request.password == ADMIN_PASSWORD:
+        return {"success": True, "token": ADMIN_TOKEN}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid password")
+
+@app.get("/api/admin/config")
+async def get_admin_config(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Get current configuration"""
+    return {
+        "config": {
+            "shopify_shop_url": SHOPIFY_SHOP_URL,
+            "shopify_access_token": SHOPIFY_ACCESS_TOKEN,
+            "shopify_api_version": SHOPIFY_API_VERSION,
+            "supabase_url": os.getenv("VITE_SUPABASE_URL", ""),
+            "supabase_anon_key": os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        }
+    }
+
+@app.post("/api/admin/config")
+async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Update configuration"""
+    global SHOPIFY_SHOP_URL, SHOPIFY_ACCESS_TOKEN, SHOPIFY_API_VERSION
+    
+    config = request.config
+    env_file_path = ".env"
+    
+    try:
+        if "shopify_shop_url" in config:
+            set_key(env_file_path, "SHOPIFY_SHOP_URL", config["shopify_shop_url"])
+            SHOPIFY_SHOP_URL = config["shopify_shop_url"]
+            
+        if "shopify_access_token" in config:
+            set_key(env_file_path, "SHOPIFY_ACCESS_TOKEN", config["shopify_access_token"])
+            SHOPIFY_ACCESS_TOKEN = config["shopify_access_token"]
+            
+        if "shopify_api_version" in config:
+            set_key(env_file_path, "SHOPIFY_API_VERSION", config["shopify_api_version"])
+            SHOPIFY_API_VERSION = config["shopify_api_version"]
+            
+        frontend_env_path = "../frontend/.env"
+        if "supabase_url" in config:
+            set_key(frontend_env_path, "VITE_SUPABASE_URL", config["supabase_url"])
+            
+        if "supabase_anon_key" in config:
+            set_key(frontend_env_path, "VITE_SUPABASE_ANON_KEY", config["supabase_anon_key"])
+        
+        return {"success": True, "message": "Configuration updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update configuration: {str(e)}")

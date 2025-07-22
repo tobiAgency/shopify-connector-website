@@ -8,6 +8,7 @@ import { ProductsPage } from './pages/ProductsPage'
 import { CoursesPage } from './pages/CoursesPage'
 import { BlogPage } from './pages/BlogPage'
 import { ResourcesPage } from './pages/ResourcesPage'
+import { AdminPage } from './pages/AdminPage'
 import { Toaster } from './components/ui/toaster'
 import { useToast } from './hooks/use-toast'
 import './App.css'
@@ -128,6 +129,7 @@ function App() {
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
 
