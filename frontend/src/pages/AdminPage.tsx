@@ -20,6 +20,7 @@ interface AdminConfig {
 export function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState('')
+  const [adminToken, setAdminToken] = useState('')
   const [config, setConfig] = useState<AdminConfig>({
     shopify_shop_url: '',
     shopify_access_token: '',
@@ -39,10 +40,11 @@ export function AdminPage() {
   const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:8000'
 
   useEffect(() => {
-    const adminAuth = localStorage.getItem('admin_authenticated')
-    if (adminAuth === 'true') {
+    const storedToken = localStorage.getItem('admin_token')
+    if (storedToken) {
+      setAdminToken(storedToken)
       setIsAuthenticated(true)
-      loadConfig()
+      loadConfig(storedToken)
     }
   }, [])
 
@@ -60,9 +62,12 @@ export function AdminPage() {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        const token = data.token
+        setAdminToken(token)
         setIsAuthenticated(true)
-        localStorage.setItem('admin_authenticated', 'true')
-        loadConfig()
+        localStorage.setItem('admin_token', token)
+        loadConfig(token)
         toast({
           title: "Login Successful",
           description: "Welcome to the admin panel.",
@@ -86,11 +91,12 @@ export function AdminPage() {
     }
   }
 
-  const loadConfig = async () => {
+  const loadConfig = async (token?: string) => {
+    const authToken = token || adminToken
     try {
       const response = await fetch(`${API_URL}/api/admin/config`, {
         headers: {
-          'Authorization': 'Bearer admin_token'
+          'Authorization': `Bearer ${authToken}`
         }
       })
       
@@ -111,7 +117,7 @@ export function AdminPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin_token'
+          'Authorization': `Bearer ${adminToken}`
         },
         body: JSON.stringify({ config }),
       })
@@ -141,7 +147,8 @@ export function AdminPage() {
 
   const handleLogout = () => {
     setIsAuthenticated(false)
-    localStorage.removeItem('admin_authenticated')
+    setAdminToken('')
+    localStorage.removeItem('admin_token')
     navigate('/')
   }
 
