@@ -42,6 +42,14 @@ export function AdminPage() {
     shop_domain?: string;
   } | null>(null)
   const [testingConnection, setTestingConnection] = useState(false)
+  const [supabaseConnectionStatus, setSupabaseConnectionStatus] = useState<{
+    success: boolean;
+    message: string;
+    error?: string;
+    url?: string;
+    status_code?: number;
+  } | null>(null)
+  const [testingSupabaseConnection, setTestingSupabaseConnection] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -195,6 +203,33 @@ export function AdminPage() {
       })
     } finally {
       setTestingConnection(false)
+    }
+  }
+
+  const testSupabaseConnection = async () => {
+    if (!adminToken) return
+    
+    setTestingSupabaseConnection(true)
+    setSupabaseConnectionStatus(null)
+    
+    try {
+      const response = await fetch(`${API_URL}/api/admin/test-supabase`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
+      
+      const result = await response.json()
+      setSupabaseConnectionStatus(result)
+    } catch (error) {
+      setSupabaseConnectionStatus({
+        success: false,
+        message: 'Failed to test connection',
+        error: 'Network error'
+      })
+    } finally {
+      setTestingSupabaseConnection(false)
     }
   }
 
@@ -395,6 +430,33 @@ export function AdminPage() {
                     </Button>
                   </div>
                 </div>
+
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={testSupabaseConnection}
+                    disabled={testingSupabaseConnection}
+                    variant="outline"
+                    className="border-amber-700 text-amber-700 hover:bg-amber-50"
+                  >
+                    {testingSupabaseConnection ? 'Testing...' : 'Test Connection'}
+                  </Button>
+                </div>
+
+                {supabaseConnectionStatus && (
+                  <Alert className={supabaseConnectionStatus.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+                    <AlertDescription className={supabaseConnectionStatus.success ? "text-green-800" : "text-red-800"}>
+                      <div className="font-medium">{supabaseConnectionStatus.message}</div>
+                      {supabaseConnectionStatus.success && supabaseConnectionStatus.url && (
+                        <div className="mt-1 text-sm">
+                          Connected to: {supabaseConnectionStatus.url} (Status: {supabaseConnectionStatus.status_code})
+                        </div>
+                      )}
+                      {!supabaseConnectionStatus.success && supabaseConnectionStatus.error && (
+                        <div className="mt-1 text-sm">Error: {supabaseConnectionStatus.error}</div>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

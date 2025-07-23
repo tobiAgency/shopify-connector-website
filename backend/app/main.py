@@ -266,6 +266,11 @@ async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuth
         if "shopify_api_version" in config:
             SHOPIFY_API_VERSION = config["shopify_api_version"]
         
+        if "supabase_url" in config:
+            os.environ["VITE_SUPABASE_URL"] = config["supabase_url"]
+            
+        if "supabase_anon_key" in config:
+            os.environ["VITE_SUPABASE_ANON_KEY"] = config["supabase_anon_key"]
         
         return {"success": True, "message": "Configuration updated successfully (active for current session)"}
     except Exception as e:
@@ -297,5 +302,72 @@ async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = De
         return {
             "success": False,
             "message": "Unexpected error testing Shopify connection",
+            "error": str(e)
+        }
+
+@app.get("/api/admin/test-supabase")
+async def test_supabase_connection(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Test Supabase connectivity and return detailed status"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            return {
+                "success": False,
+                "message": "Supabase credentials not configured",
+                "error": "Missing Supabase URL or anonymous key",
+                "current_config": {
+                    "url_configured": bool(supabase_url),
+                    "key_configured": bool(supabase_anon_key)
+                }
+            }
+        
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        test_url = f"{supabase_url}/rest/v1/"
+        logger.info(f"Testing Supabase connection to: {test_url}")
+        
+        response = requests.get(test_url, headers=headers, timeout=10)
+        logger.info(f"Supabase response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            return {
+                "success": True,
+                "message": "Supabase connection successful",
+                "url": supabase_url,
+                "status_code": response.status_code
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Supabase connection failed",
+                "error": f"HTTP {response.status_code}: {response.text}",
+                "current_config": {
+                    "url": supabase_url,
+                    "key_length": len(supabase_anon_key) if supabase_anon_key else 0
+                }
+            }
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Supabase connection error: {str(e)}")
+        return {
+            "success": False,
+            "message": "Supabase connection failed",
+            "error": f"Network error: {str(e)}",
+            "current_config": {
+                "url": os.getenv("VITE_SUPABASE_URL", ""),
+                "key_length": len(os.getenv("VITE_SUPABASE_ANON_KEY", ""))
+            }
+        }
+    except Exception as e:
+        logger.error(f"Unexpected Supabase test error: {str(e)}")
+        return {
+            "success": False,
+            "message": "Unexpected error testing Supabase connection",
             "error": str(e)
         }
