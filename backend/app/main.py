@@ -242,28 +242,18 @@ async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuth
     global SHOPIFY_SHOP_URL, SHOPIFY_ACCESS_TOKEN, SHOPIFY_API_VERSION
     
     config = request.config
-    env_file_path = ".env"
     
     try:
         if "shopify_shop_url" in config:
-            set_key(env_file_path, "SHOPIFY_SHOP_URL", config["shopify_shop_url"])
             SHOPIFY_SHOP_URL = config["shopify_shop_url"]
             
         if "shopify_access_token" in config:
-            set_key(env_file_path, "SHOPIFY_ACCESS_TOKEN", config["shopify_access_token"])
             SHOPIFY_ACCESS_TOKEN = config["shopify_access_token"]
             
         if "shopify_api_version" in config:
-            set_key(env_file_path, "SHOPIFY_API_VERSION", config["shopify_api_version"])
             SHOPIFY_API_VERSION = config["shopify_api_version"]
-            
-        frontend_env_path = "../frontend/.env"
-        if "supabase_url" in config:
-            set_key(frontend_env_path, "VITE_SUPABASE_URL", config["supabase_url"])
-            
-        if "supabase_anon_key" in config:
-            set_key(frontend_env_path, "VITE_SUPABASE_ANON_KEY", config["supabase_anon_key"])
         
-        return {"success": True, "message": "Configuration updated successfully"}
+        
+        return {"success": True, "message": "Configuration updated successfully (active for current session)"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update configuration: {str(e)}")
