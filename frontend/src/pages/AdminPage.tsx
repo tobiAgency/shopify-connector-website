@@ -113,16 +113,34 @@ export function AdminPage() {
     setSaving(true)
     
     try {
+      let cleanShopUrl = config.shopify_shop_url.trim()
+      
+      cleanShopUrl = cleanShopUrl.replace(/^https?:\/\//, '')
+      
+      cleanShopUrl = cleanShopUrl.split('/')[0]
+      
+      if (cleanShopUrl && !cleanShopUrl.includes('.myshopify.com')) {
+        if (!cleanShopUrl.includes('.')) {
+          cleanShopUrl = `${cleanShopUrl}.myshopify.com`
+        }
+      }
+      
+      const cleanedConfig = {
+        ...config,
+        shopify_shop_url: cleanShopUrl
+      }
+      
       const response = await fetch(`${API_URL}/api/admin/config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${adminToken}`
         },
-        body: JSON.stringify({ config }),
+        body: JSON.stringify({ config: cleanedConfig }),
       })
 
       if (response.ok) {
+        setConfig(cleanedConfig)
         toast({
           title: "Configuration Saved",
           description: "All settings have been updated successfully.",
@@ -237,6 +255,9 @@ export function AdminPage() {
                     onChange={(e) => setConfig(prev => ({ ...prev, shopify_shop_url: e.target.value }))}
                     placeholder="your-shop-name.myshopify.com"
                   />
+                  <p className="text-sm text-stone-600 mt-1">
+                    Enter just the shop name (e.g., "my-shop.myshopify.com" or "my-shop")
+                  </p>
                 </div>
                 
                 <div>
