@@ -138,9 +138,60 @@ The website uses a natural/organic design aesthetic with:
 ## 🗄️ Database Schema
 
 ### Supabase Tables (Optional)
-- **courses** - Course and ebook content
-- **blog_posts** - Blog articles and newsletter content  
-- **resources** - Resource page content
+
+The following SQL creates the required tables for dynamic content management. Copy and paste this into your Supabase SQL editor:
+
+```sql
+-- Courses/Ebooks table
+CREATE TABLE courses (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  image_url TEXT,
+  category TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Blog posts table
+CREATE TABLE blog_posts (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  excerpt TEXT,
+  author TEXT,
+  published_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Resources table
+CREATE TABLE resources (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  file_url TEXT,
+  category TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for public read access
+CREATE POLICY "Allow public read access on courses" ON courses FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on blog_posts" ON blog_posts FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on resources" ON resources FOR SELECT USING (true);
+```
+
+### Table Descriptions
+- **courses** - Course and ebook content with pricing and categorization
+- **blog_posts** - Blog articles and newsletter content with publishing workflow
+- **resources** - Downloadable resources and files with categorization
 
 ## 🚀 Deployment
 
