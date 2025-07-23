@@ -34,6 +34,14 @@ export function AdminPage() {
   })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState<{
+    success: boolean;
+    message: string;
+    error?: string;
+    shop_name?: string;
+    shop_domain?: string;
+  } | null>(null)
+  const [testingConnection, setTestingConnection] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -160,6 +168,33 @@ export function AdminPage() {
       })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const testShopifyConnection = async () => {
+    if (!adminToken) return
+    
+    setTestingConnection(true)
+    setConnectionStatus(null)
+    
+    try {
+      const response = await fetch(`${API_URL}/api/admin/test-shopify`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
+      
+      const result = await response.json()
+      setConnectionStatus(result)
+    } catch (error) {
+      setConnectionStatus({
+        success: false,
+        message: 'Failed to test connection',
+        error: 'Network error'
+      })
+    } finally {
+      setTestingConnection(false)
     }
   }
 
@@ -291,6 +326,33 @@ export function AdminPage() {
                     placeholder="2023-10"
                   />
                 </div>
+
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={testShopifyConnection}
+                    disabled={testingConnection}
+                    variant="outline"
+                    className="border-amber-700 text-amber-700 hover:bg-amber-50"
+                  >
+                    {testingConnection ? 'Testing...' : 'Test Connection'}
+                  </Button>
+                </div>
+
+                {connectionStatus && (
+                  <Alert className={connectionStatus.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+                    <AlertDescription className={connectionStatus.success ? "text-green-800" : "text-red-800"}>
+                      <div className="font-medium">{connectionStatus.message}</div>
+                      {connectionStatus.success && connectionStatus.shop_name && (
+                        <div className="mt-1 text-sm">
+                          Connected to: {connectionStatus.shop_name} ({connectionStatus.shop_domain})
+                        </div>
+                      )}
+                      {!connectionStatus.success && connectionStatus.error && (
+                        <div className="mt-1 text-sm">Error: {connectionStatus.error}</div>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

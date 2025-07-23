@@ -6,6 +6,10 @@ import os
 from dotenv import load_dotenv, set_key
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -49,6 +53,8 @@ def make_shopify_request(endpoint: str, method: str = "GET", data: Optional[Dict
     url = f"https://{SHOPIFY_SHOP_URL}/admin/api/{SHOPIFY_API_VERSION}/{endpoint}"
     headers = get_shopify_headers()
     
+    logger.info(f"Making Shopify API request to: {url}")
+    
     try:
         if method == "GET":
             response = requests.get(url, headers=headers)
@@ -59,9 +65,14 @@ def make_shopify_request(endpoint: str, method: str = "GET", data: Optional[Dict
         elif method == "DELETE":
             response = requests.delete(url, headers=headers)
         
+        logger.info(f"Shopify API response status: {response.status_code}")
+        
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        logger.error(f"Shopify API error: Status {response.status_code if 'response' in locals() else 'N/A'}, Error: {str(e)}")
+        if 'response' in locals():
+            logger.error(f"Response body: {response.text}")
         raise HTTPException(status_code=500, detail=f"Shopify API error: {str(e)}")
 
 @app.get("/healthz")
@@ -73,8 +84,10 @@ async def get_products(limit: int = 50):
     """Get products from Shopify store"""
     try:
         data = make_shopify_request(f"products.json?limit={limit}")
+        logger.info(f"Successfully retrieved {len(data.get('products', []))} products from Shopify")
         return {"products": data.get("products", [])}
     except Exception as e:
+        logger.warning(f"Failed to retrieve products from Shopify, falling back to demo data. Error: {str(e)}")
         return {
             "products": [
                 {
@@ -257,3 +270,32 @@ async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuth
         return {"success": True, "message": "Configuration updated successfully (active for current session)"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update configuration: {str(e)}")
+
+@app.get("/api/admin/test-shopify")
+async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Test Shopify API connectivity and return detailed status"""
+    try:
+        data = make_shopify_request("shop.json")
+        return {
+            "success": True,
+            "message": "Shopify API connection successful",
+            "shop_name": data.get("shop", {}).get("name", "Unknown"),
+            "shop_domain": data.get("shop", {}).get("domain", "Unknown")
+        }
+    except HTTPException as e:
+        return {
+            "success": False,
+            "message": "Shopify API connection failed",
+            "error": e.detail,
+            "current_config": {
+                "shop_url": SHOPIFY_SHOP_URL,
+                "api_version": SHOPIFY_API_VERSION,
+                "token_length": len(SHOPIFY_ACCESS_TOKEN) if SHOPIFY_ACCESS_TOKEN else 0
+            }
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": "Unexpected error testing Shopify connection",
+            "error": str(e)
+        }
