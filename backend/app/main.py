@@ -425,6 +425,10 @@ async def create_course(request: CourseRequest, credentials: HTTPAuthorizationCr
         supabase_url = os.getenv("VITE_SUPABASE_URL", "")
         supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
         
+        logger.info(f"Creating course with data: {request.dict()}")
+        logger.info(f"Supabase URL: {supabase_url}")
+        logger.info(f"Supabase key length: {len(supabase_anon_key) if supabase_anon_key else 0}")
+        
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
             
@@ -442,7 +446,11 @@ async def create_course(request: CourseRequest, credentials: HTTPAuthorizationCr
             "category": request.category
         }
         
+        logger.info(f"Making POST request to: {supabase_url}/rest/v1/courses")
         response = requests.post(f"{supabase_url}/rest/v1/courses", headers=headers, json=data)
+        logger.info(f"Supabase response status: {response.status_code}")
+        logger.info(f"Supabase response body: {response.text}")
+        
         if response.status_code == 201:
             return {"success": True, "message": "Course created successfully"}
         else:
