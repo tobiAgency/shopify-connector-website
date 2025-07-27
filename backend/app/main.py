@@ -38,6 +38,26 @@ class AdminLoginRequest(BaseModel):
 class AdminConfigRequest(BaseModel):
     config: Dict[str, str]
 
+class CourseRequest(BaseModel):
+    title: str
+    description: str
+    price: float
+    image_url: str
+    category: str
+
+class BlogPostRequest(BaseModel):
+    title: str
+    content: str
+    excerpt: str
+    author: str
+    published_at: Optional[str] = None
+
+class ResourceRequest(BaseModel):
+    title: str
+    description: str
+    file_url: str
+    category: str
+
 def verify_admin_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if credentials.credentials != ADMIN_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid admin token")
@@ -371,3 +391,361 @@ async def test_supabase_connection(credentials: HTTPAuthorizationCredentials = D
             "message": "Unexpected error testing Supabase connection",
             "error": str(e)
         }
+
+@app.get("/api/admin/courses")
+async def get_admin_courses(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Get all courses for admin management"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            return {"courses": []}
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.get(f"{supabase_url}/rest/v1/courses?select=*&order=created_at.desc", headers=headers)
+        if response.status_code == 200:
+            return {"courses": response.json()}
+        else:
+            logger.error(f"Supabase error fetching courses: {response.status_code} - {response.text}")
+            return {"courses": []}
+    except Exception as e:
+        logger.error(f"Error fetching courses: {str(e)}")
+        return {"courses": []}
+
+@app.post("/api/admin/courses")
+async def create_course(request: CourseRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Create a new course"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "title": request.title,
+            "description": request.description,
+            "price": request.price,
+            "image_url": request.image_url,
+            "category": request.category
+        }
+        
+        response = requests.post(f"{supabase_url}/rest/v1/courses", headers=headers, json=data)
+        if response.status_code == 201:
+            return {"success": True, "message": "Course created successfully"}
+        else:
+            logger.error(f"Supabase error creating course: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to create course")
+    except Exception as e:
+        logger.error(f"Error creating course: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create course: {str(e)}")
+
+@app.put("/api/admin/courses/{course_id}")
+async def update_course(course_id: int, request: CourseRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Update an existing course"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "title": request.title,
+            "description": request.description,
+            "price": request.price,
+            "image_url": request.image_url,
+            "category": request.category
+        }
+        
+        response = requests.patch(f"{supabase_url}/rest/v1/courses?id=eq.{course_id}", headers=headers, json=data)
+        if response.status_code == 204:
+            return {"success": True, "message": "Course updated successfully"}
+        else:
+            logger.error(f"Supabase error updating course: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to update course")
+    except Exception as e:
+        logger.error(f"Error updating course: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update course: {str(e)}")
+
+@app.delete("/api/admin/courses/{course_id}")
+async def delete_course(course_id: int, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Delete a course"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.delete(f"{supabase_url}/rest/v1/courses?id=eq.{course_id}", headers=headers)
+        if response.status_code == 204:
+            return {"success": True, "message": "Course deleted successfully"}
+        else:
+            logger.error(f"Supabase error deleting course: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to delete course")
+    except Exception as e:
+        logger.error(f"Error deleting course: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete course: {str(e)}")
+
+@app.get("/api/admin/blogs")
+async def get_admin_blogs(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Get all blog posts for admin management"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            return {"blogs": []}
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.get(f"{supabase_url}/rest/v1/blog_posts?select=*&order=created_at.desc", headers=headers)
+        if response.status_code == 200:
+            return {"blogs": response.json()}
+        else:
+            logger.error(f"Supabase error fetching blogs: {response.status_code} - {response.text}")
+            return {"blogs": []}
+    except Exception as e:
+        logger.error(f"Error fetching blogs: {str(e)}")
+        return {"blogs": []}
+
+@app.post("/api/admin/blogs")
+async def create_blog(request: BlogPostRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Create a new blog post"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "title": request.title,
+            "content": request.content,
+            "excerpt": request.excerpt,
+            "author": request.author,
+            "published_at": request.published_at or None
+        }
+        
+        response = requests.post(f"{supabase_url}/rest/v1/blog_posts", headers=headers, json=data)
+        if response.status_code == 201:
+            return {"success": True, "message": "Blog post created successfully"}
+        else:
+            logger.error(f"Supabase error creating blog: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to create blog post")
+    except Exception as e:
+        logger.error(f"Error creating blog: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create blog post: {str(e)}")
+
+@app.put("/api/admin/blogs/{blog_id}")
+async def update_blog(blog_id: int, request: BlogPostRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Update an existing blog post"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "title": request.title,
+            "content": request.content,
+            "excerpt": request.excerpt,
+            "author": request.author,
+            "published_at": request.published_at or None
+        }
+        
+        response = requests.patch(f"{supabase_url}/rest/v1/blog_posts?id=eq.{blog_id}", headers=headers, json=data)
+        if response.status_code == 204:
+            return {"success": True, "message": "Blog post updated successfully"}
+        else:
+            logger.error(f"Supabase error updating blog: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to update blog post")
+    except Exception as e:
+        logger.error(f"Error updating blog: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update blog post: {str(e)}")
+
+@app.delete("/api/admin/blogs/{blog_id}")
+async def delete_blog(blog_id: int, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Delete a blog post"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.delete(f"{supabase_url}/rest/v1/blog_posts?id=eq.{blog_id}", headers=headers)
+        if response.status_code == 204:
+            return {"success": True, "message": "Blog post deleted successfully"}
+        else:
+            logger.error(f"Supabase error deleting blog: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to delete blog post")
+    except Exception as e:
+        logger.error(f"Error deleting blog: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete blog post: {str(e)}")
+
+@app.get("/api/admin/resources")
+async def get_admin_resources(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Get all resources for admin management"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            return {"resources": []}
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.get(f"{supabase_url}/rest/v1/resources?select=*&order=created_at.desc", headers=headers)
+        if response.status_code == 200:
+            return {"resources": response.json()}
+        else:
+            logger.error(f"Supabase error fetching resources: {response.status_code} - {response.text}")
+            return {"resources": []}
+    except Exception as e:
+        logger.error(f"Error fetching resources: {str(e)}")
+        return {"resources": []}
+
+@app.post("/api/admin/resources")
+async def create_resource(request: ResourceRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Create a new resource"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "title": request.title,
+            "description": request.description,
+            "file_url": request.file_url,
+            "category": request.category
+        }
+        
+        response = requests.post(f"{supabase_url}/rest/v1/resources", headers=headers, json=data)
+        if response.status_code == 201:
+            return {"success": True, "message": "Resource created successfully"}
+        else:
+            logger.error(f"Supabase error creating resource: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to create resource")
+    except Exception as e:
+        logger.error(f"Error creating resource: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create resource: {str(e)}")
+
+@app.put("/api/admin/resources/{resource_id}")
+async def update_resource(resource_id: int, request: ResourceRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Update an existing resource"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "title": request.title,
+            "description": request.description,
+            "file_url": request.file_url,
+            "category": request.category
+        }
+        
+        response = requests.patch(f"{supabase_url}/rest/v1/resources?id=eq.{resource_id}", headers=headers, json=data)
+        if response.status_code == 204:
+            return {"success": True, "message": "Resource updated successfully"}
+        else:
+            logger.error(f"Supabase error updating resource: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to update resource")
+    except Exception as e:
+        logger.error(f"Error updating resource: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update resource: {str(e)}")
+
+@app.delete("/api/admin/resources/{resource_id}")
+async def delete_resource(resource_id: int, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
+    """Delete a resource"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            raise HTTPException(status_code=400, detail="Supabase not configured")
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.delete(f"{supabase_url}/rest/v1/resources?id=eq.{resource_id}", headers=headers)
+        if response.status_code == 204:
+            return {"success": True, "message": "Resource deleted successfully"}
+        else:
+            logger.error(f"Supabase error deleting resource: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="Failed to delete resource")
+    except Exception as e:
+        logger.error(f"Error deleting resource: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete resource: {str(e)}")

@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import { Textarea } from '../components/ui/textarea'
 import { Label } from '../components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Alert, AlertDescription } from '../components/ui/alert'
-import { Eye, EyeOff, Save, Lock, Settings } from 'lucide-react'
+import { Eye, EyeOff, Save, Lock, Settings, Plus, Edit, Trash2, X, Loader2 } from 'lucide-react'
 import { useToast } from '../hooks/use-toast'
+import { Course, BlogPost, Resource } from '../lib/supabase'
 
 interface AdminConfig {
   shopify_shop_url: string
@@ -50,6 +52,14 @@ export function AdminPage() {
     status_code?: number;
   } | null>(null)
   const [testingSupabaseConnection, setTestingSupabaseConnection] = useState(false)
+  const [courses, setCourses] = useState<Course[]>([])
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
+  const [resources, setResources] = useState<Resource[]>([])
+  const [activeContentTab, setActiveContentTab] = useState<'courses' | 'blogs' | 'resources'>('courses')
+  const [editingItem, setEditingItem] = useState<any>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [contentLoading, setContentLoading] = useState(false)
+  const [formData, setFormData] = useState<any>({})
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -61,6 +71,7 @@ export function AdminPage() {
       setAdminToken(storedToken)
       setIsAuthenticated(true)
       loadConfig(storedToken)
+      loadContentData(storedToken)
     }
   }, [])
 
@@ -233,6 +244,168 @@ export function AdminPage() {
     }
   }
 
+  const fetchContent = async (type: string, token?: string) => {
+    const authToken = token || adminToken
+    if (!authToken) return []
+    try {
+      const response = await fetch(`${API_URL}/api/admin/${type}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      })
+      const data = await response.json()
+      return data[type] || []
+    } catch (error) {
+      console.error(`Error fetching ${type}:`, error)
+      return []
+    }
+  }
+
+  const createContent = async (type: string, data: any) => {
+    if (!adminToken) return false
+    try {
+      const response = await fetch(`${API_URL}/api/admin/${type}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify(data)
+      })
+      return response.ok
+    } catch (error) {
+      console.error(`Error creating ${type}:`, error)
+      return false
+    }
+  }
+
+  const updateContent = async (type: string, id: number, data: any) => {
+    if (!adminToken) return false
+    try {
+      const response = await fetch(`${API_URL}/api/admin/${type}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify(data)
+      })
+      return response.ok
+    } catch (error) {
+      console.error(`Error updating ${type}:`, error)
+      return false
+    }
+  }
+
+  const deleteContent = async (type: string, id: number) => {
+    if (!adminToken) return false
+    try {
+      const response = await fetch(`${API_URL}/api/admin/${type}/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
+      return response.ok
+    } catch (error) {
+      console.error(`Error deleting ${type}:`, error)
+      return false
+    }
+  }
+
+  const loadContentData = async (token?: string) => {
+    setContentLoading(true)
+    try {
+      const [coursesData, blogsData, resourcesData] = await Promise.all([
+        fetchContent('courses', token),
+        fetchContent('blogs', token),
+        fetchContent('resources', token)
+      ])
+      setCourses(coursesData)
+      setBlogPosts(blogsData)
+      setResources(resourcesData)
+    } catch (error) {
+      console.error('Error loading content data:', error)
+    } finally {
+      setContentLoading(false)
+    }
+  }
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const success = await createContent(activeContentTab, formData)
+    if (success) {
+      toast({
+        title: "Success",
+        description: `${activeContentTab.slice(0, -1)} created successfully`,
+      })
+      setShowCreateForm(false)
+      setFormData({})
+      loadContentData()
+    } else {
+      toast({
+        title: "Error",
+        description: `Failed to create ${activeContentTab.slice(0, -1)}`,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const success = await updateContent(activeContentTab, editingItem.id, formData)
+    if (success) {
+      toast({
+        title: "Success",
+        description: `${activeContentTab.slice(0, -1)} updated successfully`,
+      })
+      setEditingItem(null)
+      setFormData({})
+      loadContentData()
+    } else {
+      toast({
+        title: "Error",
+        description: `Failed to update ${activeContentTab.slice(0, -1)}`,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(`Are you sure you want to delete this ${activeContentTab.slice(0, -1)}?`)) return
+    
+    const success = await deleteContent(activeContentTab, id)
+    if (success) {
+      toast({
+        title: "Success",
+        description: `${activeContentTab.slice(0, -1)} deleted successfully`,
+      })
+      loadContentData()
+    } else {
+      toast({
+        title: "Error",
+        description: `Failed to delete ${activeContentTab.slice(0, -1)}`,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const startEdit = (item: any) => {
+    setEditingItem(item)
+    setFormData(item)
+    setShowCreateForm(false)
+  }
+
+  const startCreate = () => {
+    setShowCreateForm(true)
+    setEditingItem(null)
+    setFormData({})
+  }
+
+  const cancelForm = () => {
+    setShowCreateForm(false)
+    setEditingItem(null)
+    setFormData({})
+  }
+
   const handleLogout = () => {
     setIsAuthenticated(false)
     setAdminToken('')
@@ -305,9 +478,10 @@ export function AdminPage() {
         </Alert>
 
         <Tabs defaultValue="shopify" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="shopify">Shopify Configuration</TabsTrigger>
             <TabsTrigger value="supabase">Supabase Configuration</TabsTrigger>
+            <TabsTrigger value="content">Content Management</TabsTrigger>
           </TabsList>
 
           <TabsContent value="shopify">
@@ -457,6 +631,297 @@ export function AdminPage() {
                     </AlertDescription>
                   </Alert>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="content">
+            <Card>
+              <CardHeader>
+                <CardTitle>Content Management</CardTitle>
+                <CardDescription>Manage courses, blog posts, and resources</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs value={activeContentTab} onValueChange={(value) => setActiveContentTab(value as any)}>
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="courses">Courses</TabsTrigger>
+                    <TabsTrigger value="blogs">Blog Posts</TabsTrigger>
+                    <TabsTrigger value="resources">Resources</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="courses">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Courses & Ebooks</h3>
+                        <Button onClick={startCreate}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Course
+                        </Button>
+                      </div>
+                      
+                      {(showCreateForm || editingItem) && (
+                        <Card>
+                          <CardContent className="pt-6">
+                            <form onSubmit={editingItem ? handleEditSubmit : handleCreateSubmit} className="space-y-4">
+                              <Input 
+                                placeholder="Course title" 
+                                value={formData.title || ''} 
+                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                required
+                              />
+                              <Textarea 
+                                placeholder="Course description" 
+                                value={formData.description || ''} 
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                required
+                              />
+                              <Input 
+                                type="number" 
+                                step="0.01"
+                                placeholder="Price" 
+                                value={formData.price || ''} 
+                                onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
+                                required
+                              />
+                              <Input 
+                                placeholder="Image URL" 
+                                value={formData.image_url || ''} 
+                                onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                                required
+                              />
+                              <Input 
+                                placeholder="Category" 
+                                value={formData.category || ''} 
+                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                required
+                              />
+                              <div className="flex gap-2">
+                                <Button type="submit">
+                                  <Save className="h-4 w-4 mr-2" />
+                                  {editingItem ? 'Update' : 'Create'} Course
+                                </Button>
+                                <Button type="button" variant="outline" onClick={cancelForm}>
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </form>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      <div className="space-y-2">
+                        {contentLoading ? (
+                          <div className="text-center py-4">
+                            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                          </div>
+                        ) : courses.length === 0 ? (
+                          <div className="text-center py-8 text-stone-500">
+                            No courses found. Create your first course!
+                          </div>
+                        ) : (
+                          courses.map((course) => (
+                            <Card key={course.id}>
+                              <CardContent className="flex justify-between items-center p-4">
+                                <div>
+                                  <h4 className="font-medium">{course.title}</h4>
+                                  <p className="text-sm text-stone-600">${course.price} • {course.category}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => startEdit(course)}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => handleDelete(course.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="blogs">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Blog Posts</h3>
+                        <Button onClick={startCreate}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Blog Post
+                        </Button>
+                      </div>
+                      
+                      {(showCreateForm || editingItem) && (
+                        <Card>
+                          <CardContent className="pt-6">
+                            <form onSubmit={editingItem ? handleEditSubmit : handleCreateSubmit} className="space-y-4">
+                              <Input 
+                                placeholder="Blog post title" 
+                                value={formData.title || ''} 
+                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                required
+                              />
+                              <Textarea 
+                                placeholder="Blog post content" 
+                                value={formData.content || ''} 
+                                onChange={(e) => setFormData({...formData, content: e.target.value})}
+                                rows={6}
+                                required
+                              />
+                              <Textarea 
+                                placeholder="Excerpt (short description)" 
+                                value={formData.excerpt || ''} 
+                                onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
+                                required
+                              />
+                              <Input 
+                                placeholder="Author" 
+                                value={formData.author || ''} 
+                                onChange={(e) => setFormData({...formData, author: e.target.value})}
+                                required
+                              />
+                              <Input 
+                                type="datetime-local"
+                                placeholder="Published date (optional)" 
+                                value={formData.published_at || ''} 
+                                onChange={(e) => setFormData({...formData, published_at: e.target.value})}
+                              />
+                              <div className="flex gap-2">
+                                <Button type="submit">
+                                  <Save className="h-4 w-4 mr-2" />
+                                  {editingItem ? 'Update' : 'Create'} Blog Post
+                                </Button>
+                                <Button type="button" variant="outline" onClick={cancelForm}>
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </form>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      <div className="space-y-2">
+                        {contentLoading ? (
+                          <div className="text-center py-4">
+                            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                          </div>
+                        ) : blogPosts.length === 0 ? (
+                          <div className="text-center py-8 text-stone-500">
+                            No blog posts found. Create your first blog post!
+                          </div>
+                        ) : (
+                          blogPosts.map((post) => (
+                            <Card key={post.id}>
+                              <CardContent className="flex justify-between items-center p-4">
+                                <div>
+                                  <h4 className="font-medium">{post.title}</h4>
+                                  <p className="text-sm text-stone-600">By {post.author}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => startEdit(post)}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => handleDelete(post.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="resources">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Resources</h3>
+                        <Button onClick={startCreate}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Resource
+                        </Button>
+                      </div>
+                      
+                      {(showCreateForm || editingItem) && (
+                        <Card>
+                          <CardContent className="pt-6">
+                            <form onSubmit={editingItem ? handleEditSubmit : handleCreateSubmit} className="space-y-4">
+                              <Input 
+                                placeholder="Resource title" 
+                                value={formData.title || ''} 
+                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                required
+                              />
+                              <Textarea 
+                                placeholder="Resource description" 
+                                value={formData.description || ''} 
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                required
+                              />
+                              <Input 
+                                placeholder="File URL" 
+                                value={formData.file_url || ''} 
+                                onChange={(e) => setFormData({...formData, file_url: e.target.value})}
+                                required
+                              />
+                              <Input 
+                                placeholder="Category" 
+                                value={formData.category || ''} 
+                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                required
+                              />
+                              <div className="flex gap-2">
+                                <Button type="submit">
+                                  <Save className="h-4 w-4 mr-2" />
+                                  {editingItem ? 'Update' : 'Create'} Resource
+                                </Button>
+                                <Button type="button" variant="outline" onClick={cancelForm}>
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </form>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      <div className="space-y-2">
+                        {contentLoading ? (
+                          <div className="text-center py-4">
+                            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                          </div>
+                        ) : resources.length === 0 ? (
+                          <div className="text-center py-8 text-stone-500">
+                            No resources found. Create your first resource!
+                          </div>
+                        ) : (
+                          resources.map((resource) => (
+                            <Card key={resource.id}>
+                              <CardContent className="flex justify-between items-center p-4">
+                                <div>
+                                  <h4 className="font-medium">{resource.title}</h4>
+                                  <p className="text-sm text-stone-600">{resource.category}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => startEdit(resource)}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => handleDelete(resource.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>
