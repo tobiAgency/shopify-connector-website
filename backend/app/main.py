@@ -418,6 +418,32 @@ async def get_admin_courses(credentials: HTTPAuthorizationCredentials = Depends(
         logger.error(f"Error fetching courses: {str(e)}")
         return {"courses": []}
 
+@app.get("/api/courses")
+async def get_courses():
+    """Get all courses for public access"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            return {"courses": []}
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.get(f"{supabase_url}/rest/v1/courses?select=*&order=created_at.desc", headers=headers)
+        if response.status_code == 200:
+            return {"courses": response.json()}
+        else:
+            logger.error(f"Supabase error fetching courses: {response.status_code} - {response.text}")
+            return {"courses": []}
+    except Exception as e:
+        logger.error(f"Error fetching courses: {str(e)}")
+        return {"courses": []}
+
 @app.post("/api/admin/courses")
 async def create_course(request: CourseRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Create a new course"""

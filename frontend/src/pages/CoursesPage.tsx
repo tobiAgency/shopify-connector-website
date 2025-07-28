@@ -3,7 +3,9 @@ import { BookOpen, Play, Download, Filter } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase, Course } from '../lib/supabase'
+import { Course } from '../lib/supabase'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([])
@@ -79,16 +81,14 @@ export function CoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        setCourses(demoCourses)
+      const response = await fetch(`${API_URL}/api/courses`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        setCourses(data.courses || demoCourses)
       } else {
-        setCourses(data || demoCourses)
+        console.error('API error:', response.status)
+        setCourses(demoCourses)
       }
     } catch (error) {
       console.error('Error fetching courses:', error)
