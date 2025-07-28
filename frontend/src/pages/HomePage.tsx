@@ -1,57 +1,10 @@
-import { Leaf, Award, Shield } from 'lucide-react'
+import { Play, ArrowRight, Calendar, BookOpen, Headphones } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router-dom'
 
-interface Testimonial {
-  id: number
-  name: string
-  quote: string
-  image: string
-  location?: string
-}
-
 export function HomePage() {
-  const testimonials: Testimonial[] = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      quote: "This program completely transformed my mindset. I went from feeling stuck in my career to launching my own successful business and doubling my income in just 6 months.",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      quote: "I was struggling with confidence and leadership skills. After applying these strategies, I got promoted to VP and now lead a team of 50+ people with clarity and purpose.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: 3,
-      name: "Emma Rodriguez",
-      quote: "My relationships were falling apart and I felt lost. These tools helped me rebuild my marriage, strengthen my family bonds, and create deeper connections than ever before.",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: 4,
-      name: "David Thompson",
-      quote: "I was 50 pounds overweight and had no energy. The health strategies didn't just transform my body - they gave me the vitality to pursue my dreams with unstoppable energy.",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: 5,
-      name: "Lisa Park",
-      quote: "From bankruptcy to building a 7-figure business in 2 years. These wealth-building principles completely changed my financial destiny and my family's future.",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: 6,
-      name: "James Wilson",
-      quote: "I was trapped in limiting beliefs and fear. Now I speak on stages worldwide, inspire thousands, and live with unshakeable confidence every single day.",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face"
-    }
-  ]
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div 
@@ -60,124 +13,491 @@ export function HomePage() {
             backgroundImage: 'url(https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1920&h=1080&fit=crop&crop=center)',
           }}
         >
-          <div className="absolute inset-0 bg-blue-900/40"></div>
+          <div className="absolute inset-0 bg-black/50"></div>
         </div>
-        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Unleash Your Extraordinary Life
+        <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
+          <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
+            Life is extraordinary.<br />Unleash yours.
           </h1>
-          <p className="text-xl md:text-2xl mb-8 font-light">
-            Transform your potential into power and create the life you deserve
+          <div className="flex flex-col md:flex-row gap-6 justify-center items-center mt-12">
+            <Link to="/courses">
+              <Button 
+                size="lg" 
+                className="bg-blue-600 text-white hover:bg-blue-700 px-12 py-6 text-xl font-semibold rounded-full"
+              >
+                Start now
+              </Button>
+            </Link>
+            <div className="text-lg">
+              <span className="block text-blue-300">Next Event</span>
+              <span className="block font-semibold">Business Mastery Workshop</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Promotional Banner */}
+      <section className="bg-blue-600 text-white py-4">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-lg font-semibold">
+            🔥 Limited Time: Transform Your Business in 2025 - Join Our Exclusive Masterclass
+            <Link to="/courses" className="ml-4 underline hover:no-underline">
+              Get Access Now
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      {/* Programs Section */}
+      <section className="py-20 bg-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-white mb-6">Programs that liberate</h2>
+            <Link to="/courses" className="text-blue-400 hover:text-blue-300 font-semibold text-lg flex items-center justify-center gap-2">
+              Discover programs <ArrowRight className="h-5 w-5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { 
+                title: "Business Mastery", 
+                subtitle: "Grow your business exponentially",
+                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=300&fit=crop",
+                link: "/courses"
+              },
+              { 
+                title: "Leadership Excellence", 
+                subtitle: "Become a great leader",
+                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+                link: "/courses"
+              },
+              { 
+                title: "Wealth Building", 
+                subtitle: "Build your money machine",
+                image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=300&fit=crop",
+                link: "/courses"
+              },
+              { 
+                title: "Life Mastery", 
+                subtitle: "Master mind and body",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop",
+                link: "/courses"
+              },
+              { 
+                title: "Relationship Mastery", 
+                subtitle: "Create deeper connections",
+                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=300&fit=crop",
+                link: "/courses"
+              },
+              { 
+                title: "Peak Performance", 
+                subtitle: "Experience explosive growth",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=face",
+                link: "/courses"
+              }
+            ].map((program, index) => (
+              <Link key={index} to={program.link} className="group">
+                <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4">
+                  <img 
+                    src={program.image} 
+                    alt={program.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-xl font-bold">{program.title}</h3>
+                    <p className="text-sm opacity-90">{program.subtitle}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Master Life Section */}
+      <section className="py-20 bg-gray-900 text-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
+            Master every area of your life
+          </h2>
+          <p className="text-xl mb-12 leading-relaxed">
+            Close the gap between where you are and where you want to be with scientifically proven strategies for breakthrough results.
           </p>
           <Link to="/courses">
             <Button 
               size="lg" 
-              className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 text-lg font-semibold rounded-full"
+              className="bg-blue-600 text-white hover:bg-blue-700 px-12 py-6 text-xl font-semibold rounded-full"
             >
-              Start Your Transformation
+              Start now
             </Button>
           </Link>
         </div>
       </section>
 
-      {/* Core Pillars Section */}
-      <section className="py-20 bg-white">
+      {/* Pillars Section */}
+      <section className="py-20 bg-white text-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Core Pillars for Success</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Master these essential areas to create an extraordinary life
-            </p>
+            <h2 className="text-5xl font-bold text-gray-900 mb-4">Pillars for an Extraordinary Life</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
             {[
-              { name: 'MINDSET', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face' },
-              { name: 'WEALTH', image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=300&h=300&fit=crop' },
-              { name: 'HEALTH', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop' },
-              { name: 'RELATIONSHIPS', image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop' },
-              { name: 'LEADERSHIP', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=300&fit=crop' }
+              { name: 'Mindset', link: '/courses' },
+              { name: 'Wealth', link: '/courses' },
+              { name: 'Health', link: '/courses' },
+              { name: 'Relationships', link: '/courses' },
+              { name: 'Business', link: '/courses' },
+              { name: 'Leadership', link: '/courses' },
+              { name: 'Happiness', link: '/courses' }
             ].map((pillar, index) => (
-              <div key={index} className="text-center">
-                <div className="aspect-square rounded-2xl overflow-hidden mb-4 bg-blue-100">
-                  <img 
-                    src={pillar.image} 
-                    alt={pillar.name}
-                    className="w-full h-full object-cover"
-                  />
+              <Link key={index} to={pillar.link} className="group text-center">
+                <div className="bg-gray-100 rounded-2xl p-6 group-hover:bg-blue-50 transition-colors duration-300">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                    {pillar.name}
+                  </h3>
                 </div>
-                <p className="font-bold text-gray-900 text-sm tracking-wider">{pillar.name}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 bg-gray-50">
+      {/* Celebrity Testimonials */}
+      <section className="py-20 bg-blue-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="mb-12">
+              <img 
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" 
+                alt="Success Story"
+                className="w-32 h-32 rounded-full mx-auto mb-6 object-cover"
+              />
+              <blockquote className="text-2xl md:text-3xl font-light text-white mb-8 max-w-4xl mx-auto leading-relaxed">
+                These strategies helped me discover what I am really made of. I have set new standards for myself, and I have taken my business and my life to a whole new level!
+              </blockquote>
+              <div className="text-lg font-semibold text-white">Sarah Johnson</div>
+              <div className="text-blue-200">CEO, Tech Startup</div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+              {[
+                { name: "Michael Chen", title: "Fortune 500 Executive", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" },
+                { name: "Emma Rodriguez", title: "Bestselling Author", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face" },
+                { name: "David Thompson", title: "Olympic Athlete", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face" },
+                { name: "Lisa Park", title: "Investment Banker", image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face" }
+              ].map((person, index) => (
+                <div key={index} className="text-center">
+                  <img 
+                    src={person.image} 
+                    alt={person.name}
+                    className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
+                  />
+                  <div className="font-semibold text-white text-sm">{person.name}</div>
+                  <div className="text-blue-200 text-xs">{person.title}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Meet the Founder Section */}
+      <section className="py-20 bg-white text-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <img 
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop&crop=face" 
+                alt="Founder"
+                className="w-full rounded-2xl"
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Button className="bg-blue-600 text-white hover:bg-blue-700 rounded-full p-4">
+                  <Play className="h-8 w-8" />
+                </Button>
+              </div>
+            </div>
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                Do you have a hunger to increase the quality of your life?
+              </h2>
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                We believe progress equals happiness. And no matter where you are looking to excel, we are here to help you forge your pathway to power. Meet the man who has spent over 45 years creating breakthroughs and transforming lives.
+              </p>
+              <Link to="/courses">
+                <Button className="bg-gray-900 text-white hover:bg-gray-800 px-8 py-3 rounded-full">
+                  Meet the Founder
+                </Button>
+              </Link>
+              
+              <div className="mt-12">
+                <p className="text-sm text-gray-600 mb-4">Featured in:</p>
+                <div className="flex items-center gap-8 opacity-60">
+                  <span className="text-2xl font-bold">Forbes</span>
+                  <span className="text-2xl font-bold">FORTUNE</span>
+                  <span className="text-2xl font-bold">Inc.</span>
+                  <span className="text-2xl font-bold">SUCCESS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Results Section */}
+      <section className="py-20 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Real Transformations, Real Results</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover how ordinary people achieved extraordinary breakthroughs
-            </p>
+            <h2 className="text-5xl font-bold mb-8">Results that speak for themselves</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="text-5xl font-bold text-blue-400 mb-2">50M+</div>
+                <div className="text-lg">Lives Transformed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-5xl font-bold text-blue-400 mb-2">4M+</div>
+                <div className="text-lg">Event Attendees</div>
+              </div>
+              <div className="text-center">
+                <div className="text-5xl font-bold text-blue-400 mb-2">100+</div>
+                <div className="text-lg">Countries Reached</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Upcoming Programs */}
+      <section className="py-20 bg-white text-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-gray-900 mb-6">Upcoming Programs</h2>
+            <p className="text-xl text-gray-600">Transform your life with our world-class events</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <div key={testimonial.id} className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow duration-300">
-                <div className="flex items-center mb-6">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-16 h-16 rounded-full object-cover mr-4"
-                  />
-                  <div>
-                    <h4 className="font-bold text-gray-900 text-lg">{testimonial.name}</h4>
-                    {testimonial.location && (
-                      <p className="text-gray-600 text-sm">{testimonial.location}</p>
-                    )}
+            {[
+              {
+                title: "Business Mastery",
+                date: "March 15-18, 2025",
+                location: "Las Vegas, NV",
+                price: "$2,995",
+                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=250&fit=crop"
+              },
+              {
+                title: "Unleash the Power Within",
+                date: "April 22-25, 2025",
+                location: "New York, NY",
+                price: "$1,495",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop"
+              },
+              {
+                title: "Date with Destiny",
+                date: "May 10-16, 2025",
+                location: "Palm Beach, FL",
+                price: "$4,995",
+                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=250&fit=crop"
+              }
+            ].map((event, index) => (
+              <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <img 
+                  src={event.image} 
+                  alt={event.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
+                  <div className="flex items-center text-gray-600 mb-2">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{event.date}</span>
+                  </div>
+                  <div className="text-gray-600 mb-4">{event.location}</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-blue-600">{event.price}</span>
+                    <Link to="/courses">
+                      <Button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-full">
+                        Register
+                      </Button>
+                    </Link>
                   </div>
                 </div>
-                <blockquote className="text-gray-700 leading-relaxed">
-                  "{testimonial.quote}"
-                </blockquote>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white">
+      {/* Expert Guidance */}
+      <section className="py-20 bg-blue-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                <Leaf className="h-8 w-8 text-blue-700" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Proven Strategies</h3>
-              <p className="text-gray-600">
-                Time-tested methods used by millions worldwide to create lasting transformation and breakthrough results.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-5xl font-bold mb-8">Expert guidance when you need it most</h2>
+              <p className="text-xl mb-8 leading-relaxed">
+                Get personalized coaching and support from our team of certified coaches and trainers.
               </p>
+              <div className="grid grid-cols-2 gap-8 mb-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold mb-2">98%</div>
+                  <div className="text-sm">Success Rate</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold mb-2">24/7</div>
+                  <div className="text-sm">Support Available</div>
+                </div>
+              </div>
+              <Link to="/courses">
+                <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold">
+                  Get Coaching
+                </Button>
+              </Link>
             </div>
-            <div className="text-center">
-              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                <Award className="h-8 w-8 text-blue-700" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">World-Class Coaching</h3>
-              <p className="text-gray-600">
-                Access to elite strategies and insights from top performers, entrepreneurs, and thought leaders.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-8 w-8 text-blue-700" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Guaranteed Results</h3>
-              <p className="text-gray-600">
-                Science-backed methodologies that deliver measurable improvements in every area of your life.
-              </p>
+            <div className="relative">
+              <img 
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" 
+                alt="Coaching"
+                className="w-full rounded-2xl"
+              />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Products Shop */}
+      <section className="py-20 bg-white text-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-gray-900 mb-6">Transform your life today</h2>
+            <p className="text-xl text-gray-600">Discover our collection of life-changing programs and resources</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                title: "Personal Power",
+                type: "Audio Program",
+                price: "$199",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
+              },
+              {
+                title: "Money Master",
+                type: "Digital Course",
+                price: "$299",
+                image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=300&h=300&fit=crop"
+              },
+              {
+                title: "Relationship Breakthrough",
+                type: "Video Series",
+                price: "$149",
+                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop"
+              },
+              {
+                title: "Peak Performance",
+                type: "Complete System",
+                price: "$399",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop"
+              }
+            ].map((product, index) => (
+              <Link key={index} to="/products" className="group">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                  <img 
+                    src={product.image} 
+                    alt={product.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{product.title}</h3>
+                    <p className="text-gray-600 text-sm mb-4">{product.type}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-blue-600">{product.price}</span>
+                      <Button className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-full text-sm">
+                        Buy Now
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Podcast Section */}
+      <section className="py-20 bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold mb-6">Latest Insights</h2>
+            <p className="text-xl text-gray-300">Stay inspired with our latest content</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "The Psychology of Success",
+                type: "Podcast Episode",
+                duration: "45 min",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop&crop=face"
+              },
+              {
+                title: "Building Wealth in 2025",
+                type: "Blog Article",
+                duration: "8 min read",
+                image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=300&h=200&fit=crop"
+              },
+              {
+                title: "Leadership Mastery",
+                type: "Video",
+                duration: "22 min",
+                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=200&fit=crop"
+              }
+            ].map((content, index) => (
+              <Link key={index} to="/blog" className="group">
+                <div className="bg-gray-800 rounded-2xl overflow-hidden hover:bg-gray-700 transition-colors duration-300">
+                  <div className="relative">
+                    <img 
+                      src={content.image} 
+                      alt={content.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {content.type === "Podcast Episode" ? (
+                        <Headphones className="h-12 w-12 text-white opacity-80" />
+                      ) : content.type === "Video" ? (
+                        <Play className="h-12 w-12 text-white opacity-80" />
+                      ) : (
+                        <BookOpen className="h-12 w-12 text-white opacity-80" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold text-white mb-2">{content.title}</h3>
+                    <div className="flex items-center justify-between text-gray-300 text-sm">
+                      <span>{content.type}</span>
+                      <span>{content.duration}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 bg-blue-600 text-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
+            Ready to live an extraordinary life?
+          </h2>
+          <p className="text-xl mb-12 leading-relaxed">
+            Join millions who have transformed their lives. Your extraordinary life starts now.
+          </p>
+          <Link to="/courses">
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-600 hover:bg-gray-100 px-12 py-6 text-xl font-semibold rounded-full"
+            >
+              Start Your Journey
+            </Button>
+          </Link>
         </div>
       </section>
     </div>
