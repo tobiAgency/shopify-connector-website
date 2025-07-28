@@ -24,8 +24,8 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-SHOPIFY_SHOP_URL = os.getenv("SHOPIFY_SHOP_URL", "demo-shop.myshopify.com")
-SHOPIFY_ACCESS_TOKEN = os.getenv("SHOPIFY_ACCESS_TOKEN", "demo-token")
+SHOPIFY_SHOP_URL = os.getenv("SHOPIFY_SHOP_URL", "")
+SHOPIFY_ACCESS_TOKEN = os.getenv("SHOPIFY_ACCESS_TOKEN", "")
 SHOPIFY_API_VERSION = os.getenv("SHOPIFY_API_VERSION", "2023-10")
 
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
@@ -292,14 +292,44 @@ async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuth
         if "supabase_anon_key" in config:
             os.environ["VITE_SUPABASE_ANON_KEY"] = config["supabase_anon_key"]
         
-        return {"success": True, "message": "Configuration updated successfully (active for current session)"}
+        env_file_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+        
+        if "shopify_shop_url" in config:
+            set_key(env_file_path, "SHOPIFY_SHOP_URL", config["shopify_shop_url"])
+            
+        if "shopify_access_token" in config:
+            set_key(env_file_path, "SHOPIFY_ACCESS_TOKEN", config["shopify_access_token"])
+            
+        if "shopify_api_version" in config:
+            set_key(env_file_path, "SHOPIFY_API_VERSION", config["shopify_api_version"])
+        
+        if "supabase_url" in config:
+            set_key(env_file_path, "VITE_SUPABASE_URL", config["supabase_url"])
+            
+        if "supabase_anon_key" in config:
+            set_key(env_file_path, "VITE_SUPABASE_ANON_KEY", config["supabase_anon_key"])
+        
+        return {"success": True, "message": "Configuration updated and saved permanently"}
     except Exception as e:
+        logger.error(f"Failed to update configuration: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to update configuration: {str(e)}")
 
 @app.get("/api/admin/test-shopify")
 async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Test Shopify API connectivity and return detailed status"""
     try:
+        if not SHOPIFY_SHOP_URL or not SHOPIFY_ACCESS_TOKEN:
+            return {
+                "success": False,
+                "message": "Shopify credentials not configured",
+                "error": "Please configure your Shopify shop URL and access token before testing the connection",
+                "current_config": {
+                    "shop_url": SHOPIFY_SHOP_URL or "(not set)",
+                    "api_version": SHOPIFY_API_VERSION,
+                    "token_configured": bool(SHOPIFY_ACCESS_TOKEN)
+                }
+            }
+            
         data = make_shopify_request("shop.json")
         return {
             "success": True,
