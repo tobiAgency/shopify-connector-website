@@ -444,6 +444,58 @@ async def get_courses():
         logger.error(f"Error fetching courses: {str(e)}")
         return {"courses": []}
 
+@app.get("/api/blogs")
+async def get_blogs():
+    """Get all blog posts for public access"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            return {"blogs": []}
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.get(f"{supabase_url}/rest/v1/blog_posts?select=*&order=published_at.desc", headers=headers)
+        if response.status_code == 200:
+            return {"blogs": response.json()}
+        else:
+            logger.error(f"Supabase error fetching blog posts: {response.status_code} - {response.text}")
+            return {"blogs": []}
+    except Exception as e:
+        logger.error(f"Error fetching blog posts: {str(e)}")
+        return {"blogs": []}
+
+@app.get("/api/resources")
+async def get_resources():
+    """Get all resources for public access"""
+    try:
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_anon_key:
+            return {"resources": []}
+            
+        headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.get(f"{supabase_url}/rest/v1/resources?select=*&order=created_at.desc", headers=headers)
+        if response.status_code == 200:
+            return {"resources": response.json()}
+        else:
+            logger.error(f"Supabase error fetching resources: {response.status_code} - {response.text}")
+            return {"resources": []}
+    except Exception as e:
+        logger.error(f"Error fetching resources: {str(e)}")
+        return {"resources": []}
+
 @app.post("/api/admin/courses")
 async def create_course(request: CourseRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Create a new course"""

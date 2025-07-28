@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { Calendar, User, Clock, ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../components/ui/card'
-import { supabase, BlogPost } from '../lib/supabase'
+import { BlogPost } from '../lib/supabase'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -77,16 +79,14 @@ export function BlogPage() {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('published_at', { ascending: false })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        setPosts(demoPosts)
+      const response = await fetch(`${API_URL}/api/blogs`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        setPosts(data.blogs || demoPosts)
       } else {
-        setPosts(data || demoPosts)
+        console.error('API error:', response.status)
+        setPosts(demoPosts)
       }
     } catch (error) {
       console.error('Error fetching blog posts:', error)

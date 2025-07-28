@@ -3,7 +3,9 @@ import { FileText, Download, Search, Filter, ExternalLink } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { supabase, Resource } from '../lib/supabase'
+import { Resource } from '../lib/supabase'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([])
@@ -74,16 +76,14 @@ export function ResourcesPage() {
 
   const fetchResources = async () => {
     try {
-      const { data, error } = await supabase
-        .from('resources')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        setResources(demoResources)
+      const response = await fetch(`${API_URL}/api/resources`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        setResources(data.resources || demoResources)
       } else {
-        setResources(data || demoResources)
+        console.error('API error:', response.status)
+        setResources(demoResources)
       }
     } catch (error) {
       console.error('Error fetching resources:', error)
