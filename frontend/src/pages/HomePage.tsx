@@ -43,48 +43,48 @@ export function HomePage() {
       <section className="py-20 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-white mb-6">Programs that liberate</h2>
-            <Link to="/courses" className="text-blue-400 hover:text-blue-300 font-semibold text-lg flex items-center justify-center gap-2">
-              Discover programs <ArrowRight className="h-5 w-5" />
+            <h2 className="text-5xl font-bold text-white mb-6">Shop Natural Skincare</h2>
+            <Link to="/products" className="text-blue-400 hover:text-blue-300 font-semibold text-lg flex items-center justify-center gap-2">
+              Discover Products <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { 
-                title: "Business Mastery", 
-                subtitle: "Grow your business exponentially",
-                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=300&fit=crop",
-                link: "/courses"
+                title: "Natural Skincare", 
+                subtitle: "Skincare designed to restore health and vitality using only clean, natural ingredients.",
+                image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop",
+                link: "/products"
               },
               { 
-                title: "Leadership Excellence", 
-                subtitle: "Become a great leader",
-                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
-                link: "/courses"
-              },
-              { 
-                title: "Wealth Building", 
-                subtitle: "Build your money machine",
-                image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=300&fit=crop",
-                link: "/courses"
-              },
-              { 
-                title: "Life Mastery", 
-                subtitle: "Master mind and body",
+                title: "Feel-Good Ingredients", 
+                subtitle: "Formulated with nourishing components you can feel confident putting on your skin.",
                 image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop",
-                link: "/courses"
+                link: "/products"
               },
               { 
-                title: "Relationship Mastery", 
-                subtitle: "Create deeper connections",
-                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=300&fit=crop",
-                link: "/courses"
+                title: "Grass-Fed Tallow", 
+                subtitle: "Our tallow is sourced from locally raised, grass-fed and finished cattle for maximum purity and quality.",
+                image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=300&fit=crop",
+                link: "/products"
               },
               { 
-                title: "Peak Performance", 
-                subtitle: "Experience explosive growth",
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=face",
-                link: "/courses"
+                title: "Support for Small Farmers", 
+                subtitle: "We work directly with small, ethical farms—strengthening local economies and communities.",
+                image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&h=300&fit=crop",
+                link: "/products"
+              },
+              { 
+                title: "Eco-Friendly & Regenerative", 
+                subtitle: "Our practices help restore ecosystems and honor the balance of nature.",
+                image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
+                link: "/products"
+              },
+              { 
+                title: "Deeply Nourishing", 
+                subtitle: "Rich in vitamins and fatty acids, our formulas deeply moisturize and support your skin's natural barrier.",
+                image: "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=400&h=300&fit=crop",
+                link: "/products"
               }
             ].map((program, index) => (
               <Link key={index} to={program.link} className="group">
