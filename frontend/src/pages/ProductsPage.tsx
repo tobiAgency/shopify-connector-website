@@ -23,7 +23,6 @@ interface Product {
     title: string
     price: string
     inventory_quantity: number
-    available: boolean
   }>
 }
 
@@ -163,7 +162,11 @@ export function ProductsPage({ cartItems, onAddToCart }: ProductsPageProps) {
                   <CardFooter className="pt-0">
                     <Button 
                       onClick={() => addToCart(product)}
-                      disabled={!product.variants[0]?.available || cartItems.includes(product.id)}
+                      disabled={
+                        !product.variants[0] || 
+                        product.variants[0].inventory_quantity <= 0 || 
+                        cartItems.includes(product.id)
+                      }
                       className={`w-full py-3 font-semibold rounded-full transition-all duration-300 ${
                         cartItems.includes(product.id) 
                           ? 'bg-stone-400 text-white cursor-not-allowed' 

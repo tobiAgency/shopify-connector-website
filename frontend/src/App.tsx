@@ -98,12 +98,55 @@ function App() {
     })
   }
 
-  const handleCheckout = () => {
-    toast({
-      title: "Checkout",
-      description: "Redirecting to Shopify checkout...",
-    })
-    console.log('Proceeding to checkout with items:', cartItems)
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Cart Empty",
+        description: "Please add items to your cart before checking out.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      toast({
+        title: "Creating Checkout",
+        description: "Preparing your Shopify checkout...",
+      })
+
+      const response = await fetch(`${API_URL}/api/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: cartItems
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        toast({
+          title: "Redirecting to Checkout",
+          description: "Taking you to Shopify checkout...",
+        })
+        
+        setCartItems([])
+        setIsCartOpen(false)
+        
+        window.location.href = data.checkout_url
+      } else {
+        throw new Error(data.detail || 'Failed to create checkout')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      toast({
+        title: "Checkout Failed",
+        description: error instanceof Error ? error.message : "Failed to create checkout. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

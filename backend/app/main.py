@@ -58,6 +58,9 @@ class ResourceRequest(BaseModel):
     file_url: str
     category: str
 
+class CheckoutRequest(BaseModel):
+    items: List[Dict[str, Any]]
+
 def verify_admin_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if credentials.credentials != ADMIN_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid admin token")
@@ -892,3 +895,51 @@ async def delete_resource(resource_id: int, credentials: HTTPAuthorizationCreden
     except Exception as e:
         logger.error(f"Error deleting resource: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to delete resource: {str(e)}")
+
+@app.post("/api/checkout")
+async def create_checkout(request: CheckoutRequest):
+    """Create Shopify checkout using DraftOrder API"""
+    try:
+        if not request.items:
+            raise HTTPException(status_code=400, detail="Cart is empty")
+        
+        line_items = []
+        for item in request.items:
+            if not item.get('variant_id'):
+                raise HTTPException(status_code=400, detail=f"Missing variant_id for item: {item.get('title', 'Unknown')}")
+            
+            line_items.append({
+                "variant_id": item['variant_id'],
+                "quantity": item['quantity']
+            })
+        
+        draft_order_data = {
+            "draft_order": {
+                "line_items": line_items,
+                "use_customer_default_address": True
+            }
+        }
+        
+        logger.info(f"Creating DraftOrder with {len(line_items)} items")
+        response_data = make_shopify_request("draft_orders.json", method="POST", data=draft_order_data)
+        
+        draft_order = response_data.get("draft_order", {})
+        invoice_url = draft_order.get("invoice_url")
+        
+        if not invoice_url:
+            raise HTTPException(status_code=500, detail="Failed to generate checkout URL")
+        
+        logger.info(f"Successfully created DraftOrder {draft_order.get('id')} with invoice URL")
+        
+        return {
+            "success": True,
+            "checkout_url": invoice_url,
+            "draft_order_id": draft_order.get("id"),
+            "total_price": draft_order.get("total_price", "0.00")
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Checkout creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create checkout: {str(e)}")
