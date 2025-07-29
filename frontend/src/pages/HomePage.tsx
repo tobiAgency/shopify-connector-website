@@ -110,10 +110,10 @@ export function HomePage() {
       <section className="py-20 bg-gray-900 text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
-            Master every area of your life
+            Self Mastery Tools
           </h2>
           <p className="text-xl mb-12 leading-relaxed">
-            Close the gap between where you are and where you want to be with scientifically proven strategies for breakthrough results.
+            Learn the core tenets of holistic living and walk away with essential tools to master your life as you embark on the hero's journey—awakening to the true nature of yourself
           </p>
           <Link to="/courses">
             <Button 
