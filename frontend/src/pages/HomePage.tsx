@@ -7,32 +7,23 @@ export function HomePage() {
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1920&h=1080&fit=crop&crop=center)',
-          }}
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
         >
-          <div className="absolute inset-0 bg-black/50"></div>
-        </div>
+          <source src="https://lgjmpmacuyfauwztwkuj.supabase.co/storage/v1/object/public/webiste//header_image.mov" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
-          <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
-            Life is extraordinary.<br />Unleash yours.
+          <h1 className="text-7xl md:text-9xl font-bold mb-6 leading-tight tracking-wider">
+            KNOW THYSELF
           </h1>
-          <div className="flex flex-col md:flex-row gap-6 justify-center items-center mt-12">
-            <Link to="/courses">
-              <Button 
-                size="lg" 
-                className="bg-blue-600 text-white hover:bg-blue-700 px-12 py-6 text-xl font-semibold rounded-full"
-              >
-                Start now
-              </Button>
-            </Link>
-            <div className="text-lg">
-              <span className="block text-blue-300">Next Event</span>
-              <span className="block font-semibold">Business Mastery Workshop</span>
-            </div>
-          </div>
+          <p className="text-lg md:text-xl font-light mb-12 tracking-wide opacity-90">
+            A SPACE TO REMEMBER YOUR TRUE NATURE
+          </p>
         </div>
       </section>
 
