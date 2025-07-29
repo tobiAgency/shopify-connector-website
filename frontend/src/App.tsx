@@ -152,7 +152,6 @@ function App() {
   return (
     <div className="min-h-screen bg-stone-50">
       <Header 
-        shopName={shopInfo?.name} 
         cartItems={cartItems} 
         onCartClick={() => setIsCartOpen(true)}
       />
