@@ -19,10 +19,10 @@ export function HomePage() {
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
           <h1 className="text-7xl md:text-9xl font-bold mb-6 leading-tight tracking-wider">
-            KNOW THYSELF
+            MISFIT HEALTH
           </h1>
           <p className="text-lg md:text-xl font-light mb-12 tracking-wide opacity-90">
-            A SPACE TO REMEMBER YOUR TRUE NATURE
+            A ROADMAP TO THE HEROES JOURNEY
           </p>
         </div>
       </section>
