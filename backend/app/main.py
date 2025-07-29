@@ -275,6 +275,7 @@ async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuth
     global SHOPIFY_SHOP_URL, SHOPIFY_ACCESS_TOKEN, SHOPIFY_API_VERSION
     
     config = request.config
+    is_deployment = os.getenv("FLY_APP_NAME") is not None
     
     try:
         if "shopify_shop_url" in config:
@@ -292,24 +293,45 @@ async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuth
         if "supabase_anon_key" in config:
             os.environ["VITE_SUPABASE_ANON_KEY"] = config["supabase_anon_key"]
         
-        env_file_path = os.path.join(os.path.dirname(__file__), "..", ".env")
-        
-        if "shopify_shop_url" in config:
-            set_key(env_file_path, "SHOPIFY_SHOP_URL", config["shopify_shop_url"])
+        if is_deployment:
+            secrets_needed = []
+            if "shopify_shop_url" in config:
+                secrets_needed.append(f"SHOPIFY_SHOP_URL={config['shopify_shop_url']}")
+            if "shopify_access_token" in config:
+                secrets_needed.append(f"SHOPIFY_ACCESS_TOKEN={config['shopify_access_token']}")
+            if "shopify_api_version" in config:
+                secrets_needed.append(f"SHOPIFY_API_VERSION={config['shopify_api_version']}")
+            if "supabase_url" in config:
+                secrets_needed.append(f"VITE_SUPABASE_URL={config['supabase_url']}")
+            if "supabase_anon_key" in config:
+                secrets_needed.append(f"VITE_SUPABASE_ANON_KEY={config['supabase_anon_key']}")
             
-        if "shopify_access_token" in config:
-            set_key(env_file_path, "SHOPIFY_ACCESS_TOKEN", config["shopify_access_token"])
+            return {
+                "success": True, 
+                "message": "Configuration updated for current session. For permanent storage, set these Fly.io secrets:",
+                "secrets_command": f"flyctl secrets set {' '.join(secrets_needed)} --app shopify-connector-backend",
+                "note": "Configuration will persist until server restart. Use the secrets command for permanent storage."
+            }
+        else:
+            env_file_path = os.path.join(os.path.dirname(__file__), "..", ".env")
             
-        if "shopify_api_version" in config:
-            set_key(env_file_path, "SHOPIFY_API_VERSION", config["shopify_api_version"])
-        
-        if "supabase_url" in config:
-            set_key(env_file_path, "VITE_SUPABASE_URL", config["supabase_url"])
+            if "shopify_shop_url" in config:
+                set_key(env_file_path, "SHOPIFY_SHOP_URL", config["shopify_shop_url"])
+                
+            if "shopify_access_token" in config:
+                set_key(env_file_path, "SHOPIFY_ACCESS_TOKEN", config["shopify_access_token"])
+                
+            if "shopify_api_version" in config:
+                set_key(env_file_path, "SHOPIFY_API_VERSION", config["shopify_api_version"])
             
-        if "supabase_anon_key" in config:
-            set_key(env_file_path, "VITE_SUPABASE_ANON_KEY", config["supabase_anon_key"])
+            if "supabase_url" in config:
+                set_key(env_file_path, "VITE_SUPABASE_URL", config["supabase_url"])
+                
+            if "supabase_anon_key" in config:
+                set_key(env_file_path, "VITE_SUPABASE_ANON_KEY", config["supabase_anon_key"])
+            
+            return {"success": True, "message": "Configuration updated and saved permanently to .env file"}
         
-        return {"success": True, "message": "Configuration updated and saved permanently"}
     except Exception as e:
         logger.error(f"Failed to update configuration: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to update configuration: {str(e)}")
@@ -317,6 +339,8 @@ async def update_admin_config(request: AdminConfigRequest, credentials: HTTPAuth
 @app.get("/api/admin/test-shopify")
 async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Test Shopify API connectivity and return detailed status"""
+    is_deployment = os.getenv("FLY_APP_NAME") is not None
+    
     try:
         if not SHOPIFY_SHOP_URL or not SHOPIFY_ACCESS_TOKEN:
             return {
@@ -327,7 +351,8 @@ async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = De
                     "shop_url": SHOPIFY_SHOP_URL or "(not set)",
                     "api_version": SHOPIFY_API_VERSION,
                     "token_configured": bool(SHOPIFY_ACCESS_TOKEN)
-                }
+                },
+                "persistence_note": "In deployment, use Fly.io secrets for permanent storage" if is_deployment else "Configuration saved to .env file"
             }
             
         data = make_shopify_request("shop.json")
@@ -335,7 +360,8 @@ async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = De
             "success": True,
             "message": "Shopify API connection successful",
             "shop_name": data.get("shop", {}).get("name", "Unknown"),
-            "shop_domain": data.get("shop", {}).get("domain", "Unknown")
+            "shop_domain": data.get("shop", {}).get("domain", "Unknown"),
+            "persistence_status": "Using Fly.io secrets" if is_deployment else "Using .env file"
         }
     except HTTPException as e:
         return {
@@ -346,7 +372,8 @@ async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = De
                 "shop_url": SHOPIFY_SHOP_URL,
                 "api_version": SHOPIFY_API_VERSION,
                 "token_length": len(SHOPIFY_ACCESS_TOKEN) if SHOPIFY_ACCESS_TOKEN else 0
-            }
+            },
+            "persistence_note": "In deployment, use Fly.io secrets for permanent storage" if is_deployment else "Configuration saved to .env file"
         }
     except Exception as e:
         return {
