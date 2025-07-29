@@ -48,7 +48,8 @@ export function HomePage() {
               Discover Products <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Top row - 3 sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             {[
               { 
                 title: "Natural Skincare", 
@@ -67,24 +68,6 @@ export function HomePage() {
                 subtitle: "Our tallow is sourced from locally raised, grass-fed and finished cattle for maximum purity and quality.",
                 image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=300&fit=crop",
                 link: "/products"
-              },
-              { 
-                title: "Support for Small Farmers", 
-                subtitle: "We work directly with small, ethical farms—strengthening local economies and communities.",
-                image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&h=300&fit=crop",
-                link: "/products"
-              },
-              { 
-                title: "Eco-Friendly & Regenerative", 
-                subtitle: "Our practices help restore ecosystems and honor the balance of nature.",
-                image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
-                link: "/products"
-              },
-              { 
-                title: "Deeply Nourishing", 
-                subtitle: "Rich in vitamins and fatty acids, our formulas deeply moisturize and support your skin's natural barrier.",
-                image: "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?w=400&h=300&fit=crop",
-                link: "/products"
               }
             ].map((program, index) => (
               <Link key={index} to={program.link} className="group">
@@ -102,6 +85,45 @@ export function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Bottom row - 2 sections with different widths but same height */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Support for Small Farmers - 2/3 width */}
+            <div className="lg:col-span-2">
+              <Link to="/products" className="group h-full">
+                <div className="relative overflow-hidden rounded-2xl h-64 mb-4">
+                  <img 
+                    src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&h=300&fit=crop"
+                    alt="Support for Small Farmers"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-xl font-bold">Support for Small Farmers</h3>
+                    <p className="text-sm opacity-90">We work directly with small, ethical farms—strengthening local economies and communities.</p>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            {/* Eco-Friendly & Regenerative - 1/3 width */}
+            <div className="lg:col-span-1">
+              <Link to="/products" className="group h-full">
+                <div className="relative overflow-hidden rounded-2xl h-64 mb-4">
+                  <img 
+                    src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop"
+                    alt="Eco-Friendly & Regenerative"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-xl font-bold">Eco-Friendly & Regenerative</h3>
+                    <p className="text-sm opacity-90">Our practices help restore ecosystems and honor the balance of nature.</p>
+                  </div>
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
