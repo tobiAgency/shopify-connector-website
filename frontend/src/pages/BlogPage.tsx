@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Calendar, User, Clock, ArrowRight } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../components/ui/card'
@@ -180,10 +181,12 @@ export function BlogPage() {
                     </div>
                   </CardContent>
                   <CardFooter className="pt-0">
-                    <Button variant="outline" className="w-full py-3 font-semibold rounded-full border-stone-300 text-stone-700 hover:bg-stone-100 transition-all duration-300">
-                      <ArrowRight className="h-5 w-5 mr-2" />
-                      Read More
-                    </Button>
+                    <Link to={`/blog/${post.id}`} className="w-full">
+                      <Button variant="outline" className="w-full py-3 font-semibold rounded-full border-stone-300 text-stone-700 hover:bg-stone-100 transition-all duration-300">
+                        <ArrowRight className="h-5 w-5 mr-2" />
+                        Read More
+                      </Button>
+                    </Link>
                   </CardFooter>
                 </Card>
               ))}

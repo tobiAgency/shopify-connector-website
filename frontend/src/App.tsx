@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage'
 import { ProductsPage } from './pages/ProductsPage'
 import { CoursesPage } from './pages/CoursesPage'
 import { BlogPage } from './pages/BlogPage'
+import { BlogPostPage } from './pages/BlogPostPage'
 import { ResourcesPage } from './pages/ResourcesPage'
 import { AdminPage } from './pages/AdminPage'
 import { Toaster } from './components/ui/toaster'
@@ -170,6 +171,7 @@ function App() {
           />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
