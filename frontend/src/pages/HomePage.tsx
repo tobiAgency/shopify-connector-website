@@ -238,6 +238,10 @@ export function HomePage() {
               <p className="text-lg text-gray-700 mb-8 leading-relaxed">
                 We believe progress equals happiness. And no matter where you are looking to excel, we are here to help you forge your pathway to power. Meet the man who has spent over 45 years creating breakthroughs and transforming lives.
               </p>
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                My own health struggles—acne, eating disorders, and later anxiety—forced me to take ownership of my healing. After years of failed conventional treatments, I turned to natural approaches and eventually found a mentor, Paul Chek, who helped me realize that true health is the integration of mind, body, and spirit. Through daily practice and refinement, I transformed not only my physical health but also my mental well-being and sense of purpose. Now, I help others do the same—building strong foundations for lasting change and living fully and authentically.
+              </p>
+
               <Link to="/courses">
                 <Button className="bg-gray-900 text-white hover:bg-gray-800 px-8 py-3 rounded-full">
                   Meet the Founder
