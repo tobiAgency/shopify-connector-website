@@ -90,7 +90,7 @@ export function Header({ cartItems, onCartClick }: HeaderProps) {
                     : 'text-stone-700 hover:text-amber-700'
               }`}
             >
-              Courses &amp; Ebooks
+              Learn &amp; Grow
             </Link>
             <Link 
               to="/blog" 
@@ -102,7 +102,7 @@ export function Header({ cartItems, onCartClick }: HeaderProps) {
                     : 'text-stone-700 hover:text-amber-700'
               }`}
             >
-              Blog
+              Learn &amp; Reflect
             </Link>
             <Link 
               to="/resources" 

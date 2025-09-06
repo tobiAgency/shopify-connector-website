@@ -39,6 +39,66 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Upcoming Programs */}
+      <section className="py-20 bg-white text-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-gray-900 mb-6">Upcoming Programs</h2>
+            <p className="text-xl text-gray-600">Transform your life with our world-class events</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Business Mastery",
+                date: "March 15-18, 2025",
+                location: "Las Vegas, NV",
+                price: "$2,995",
+                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=250&fit=crop"
+              },
+              {
+                title: "Unleash the Power Within",
+                date: "April 22-25, 2025",
+                location: "New York, NY",
+                price: "$1,495",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop"
+              },
+              {
+                title: "Date with Destiny",
+                date: "May 10-16, 2025",
+                location: "Palm Beach, FL",
+                price: "$4,995",
+                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=250&fit=crop"
+              }
+            ].map((event, index) => (
+              <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <img 
+                  src={event.image} 
+                  alt={event.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
+                  <div className="flex items-center text-gray-600 mb-2">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{event.date}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 mb-2">
+                    <Clock className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{event.location}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-semibold text-gray-900">{event.price}</span>
+                    <Button className="bg-blue-600 text-white hover:bg-blue-700 rounded-full">
+                      Learn More
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Programs Section */}
       <section className="py-20 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -285,64 +345,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Upcoming Programs */}
-      <section className="py-20 bg-white text-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-gray-900 mb-6">Upcoming Programs</h2>
-            <p className="text-xl text-gray-600">Transform your life with our world-class events</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Business Mastery",
-                date: "March 15-18, 2025",
-                location: "Las Vegas, NV",
-                price: "$2,995",
-                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=250&fit=crop"
-              },
-              {
-                title: "Unleash the Power Within",
-                date: "April 22-25, 2025",
-                location: "New York, NY",
-                price: "$1,495",
-                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop"
-              },
-              {
-                title: "Date with Destiny",
-                date: "May 10-16, 2025",
-                location: "Palm Beach, FL",
-                price: "$4,995",
-                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=250&fit=crop"
-              }
-            ].map((event, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <img 
-                  src={event.image} 
-                  alt={event.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                  <div className="flex items-center text-gray-600 mb-2">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.date}</span>
-                  </div>
-                  <div className="text-gray-600 mb-4">{event.location}</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-blue-600">{event.price}</span>
-                    <Link to="/courses">
-                      <Button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-full">
-                        Register
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Expert Guidance */}
       <section className="py-20 bg-blue-600 text-white">
