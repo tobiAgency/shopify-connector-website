@@ -1,4 +1,4 @@
-import { Play, ArrowRight, Calendar, BookOpen, Headphones } from 'lucide-react'
+import { Play, ArrowRight, BookOpen, Headphones } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router-dom'
 
@@ -39,11 +39,62 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Featured Sections */}
+      <section className="py-20 bg-black text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Shop Natural Skincare",
+                link: "/products",
+                cta: "Shop",
+                description:
+                  "Natural skincare designed to restore health and vitality with ingredients you can feel good about. Our tallow is sourced from locally raised, grass‑fed and finished cattle—supporting small farmers, restoring the ecosystem, and honoring nature’s design. Good for your body, the planet, and the animals. Everyone wins.",
+                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=250&fit=crop"
+              },
+              {
+                title: "Self Mastery Tools",
+                link: "/courses",
+                cta: "Get Started",
+                description:
+                  "Courses and eBooks to help you create sustainable change through a mind‑body‑spirit approach. Learn the core tenets of holistic living and walk away with essential tools to master your life as you embark on the hero’s journey—awakening to the true nature of yourself.",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop"
+              },
+              {
+                title: "Articles and Insights",
+                link: "/blog",
+                cta: "Explore",
+                description:
+                  "A space to deepen your understanding of health and spirituality through thoughtful writing and research. Here you’ll find insights drawn from my own journey, as well as the wisdom of trusted professionals in the field. Knowledge is power—and a tool for living authentically as you navigate the world.",
+                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=250&fit=crop"
+              }
+            ].map((card, index) => (
+              <Link key={index} to={card.link} className="group">
+                <div className="bg-stone-900 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                  <img 
+                    src={card.image} 
+                    alt={card.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-3">{card.title}</h3>
+                    <p className="text-stone-300 text-sm leading-relaxed mb-4">{card.description}</p>
+                    <Button className="bg-blue-600 text-white hover:bg-blue-700 rounded-full px-6 py-2 text-sm">
+                      {card.cta}
+                    </Button>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Programs Section */}
-      <section className="py-20 bg-black">
+      <section className="py-20 bg-white text-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-white mb-6">Shop Natural Skincare</h2>
+            <h2 className="text-5xl font-bold text-black mb-6">Shop Natural Skincare</h2>
             <Link to="/products" className="text-blue-400 hover:text-blue-300 font-semibold text-lg flex items-center justify-center gap-2">
               Discover Products <ArrowRight className="h-5 w-5" />
             </Link>
@@ -221,15 +272,10 @@ export function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop&crop=face" 
+                src="https://lgjmpmacuyfauwztwkuj.supabase.co/storage/v1/object/public/website/about_me_zachariah.jpg" 
                 alt="Founder"
                 className="w-full rounded-2xl"
               />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Button className="bg-blue-600 text-white hover:bg-blue-700 rounded-full p-4">
-                  <Play className="h-8 w-8" />
-                </Button>
-              </div>
             </div>
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
@@ -248,15 +294,6 @@ export function HomePage() {
                 </Button>
               </Link>
               
-              <div className="mt-12">
-                <p className="text-sm text-gray-600 mb-4">Featured in:</p>
-                <div className="flex items-center gap-8 opacity-60">
-                  <span className="text-2xl font-bold">Forbes</span>
-                  <span className="text-2xl font-bold">FORTUNE</span>
-                  <span className="text-2xl font-bold">Inc.</span>
-                  <span className="text-2xl font-bold">SUCCESS</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -285,64 +322,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Upcoming Programs */}
-      <section className="py-20 bg-white text-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-gray-900 mb-6">Upcoming Programs</h2>
-            <p className="text-xl text-gray-600">Transform your life with our world-class events</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Business Mastery",
-                date: "March 15-18, 2025",
-                location: "Las Vegas, NV",
-                price: "$2,995",
-                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=250&fit=crop"
-              },
-              {
-                title: "Unleash the Power Within",
-                date: "April 22-25, 2025",
-                location: "New York, NY",
-                price: "$1,495",
-                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop"
-              },
-              {
-                title: "Date with Destiny",
-                date: "May 10-16, 2025",
-                location: "Palm Beach, FL",
-                price: "$4,995",
-                image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=250&fit=crop"
-              }
-            ].map((event, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <img 
-                  src={event.image} 
-                  alt={event.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                  <div className="flex items-center text-gray-600 mb-2">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.date}</span>
-                  </div>
-                  <div className="text-gray-600 mb-4">{event.location}</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-blue-600">{event.price}</span>
-                    <Link to="/courses">
-                      <Button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-full">
-                        Register
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Expert Guidance */}
       <section className="py-20 bg-blue-600 text-white">

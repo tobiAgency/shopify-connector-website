@@ -30,8 +30,8 @@ export function Footer({ shopInfo }: FooterProps) {
             <h4 className="text-lg font-bold mb-6">Shop</h4>
             <ul className="space-y-3 text-stone-300">
               <li><Link to="/products" className="hover:text-amber-400 transition-colors">All Products</Link></li>
-              <li><Link to="/courses" className="hover:text-amber-400 transition-colors">Courses &amp; Ebooks</Link></li>
-              <li><Link to="/blog" className="hover:text-amber-400 transition-colors">Blog</Link></li>
+              <li><Link to="/courses" className="hover:text-amber-400 transition-colors">Learn &amp; Grow</Link></li>
+              <li><Link to="/blog" className="hover:text-amber-400 transition-colors">Learn &amp; Reflect</Link></li>
               <li><Link to="/resources" className="hover:text-amber-400 transition-colors">Resources</Link></li>
             </ul>
           </div>
