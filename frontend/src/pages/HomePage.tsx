@@ -82,10 +82,7 @@ export function HomePage() {
                     <Calendar className="h-4 w-4 mr-2" />
                     <span className="text-sm">{event.date}</span>
                   </div>
-                  <div className="flex items-center text-gray-600 mb-2">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.location}</span>
-                  </div>
+                  <div className="text-gray-600 mb-4">{event.location}</div>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-semibold text-gray-900">{event.price}</span>
                     <Button className="bg-blue-600 text-white hover:bg-blue-700 rounded-full">
