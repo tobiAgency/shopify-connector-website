@@ -20,7 +20,7 @@ export default {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			},
-  			'custom-dark': '#0d546b',
+  			'custom-dark': '#715c46',
   			'custom-blue': '#9a5749'
   		},
   		keyframes: {
