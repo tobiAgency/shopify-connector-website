@@ -25,7 +25,6 @@ export function AdminPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [session, setSession] = useState<Session | null>(null)
-  const [isSignupMode, setIsSignupMode] = useState(false)
   const [config, setConfig] = useState<AdminConfig>({
     shopify_shop_url: '',
     shopify_access_token: '',
@@ -91,47 +90,26 @@ export function AdminPage() {
     setLoading(true)
 
     try {
-      if (isSignupMode) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        })
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-        if (error) {
-          toast({
-            title: "Signup Failed",
-            description: error.message,
-            variant: "destructive",
-          })
-        } else {
-          toast({
-            title: "Signup Successful",
-            description: "Admin user created successfully. You can now login.",
-          })
-          setIsSignupMode(false)
-        }
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
         })
-
-        if (error) {
-          toast({
-            title: "Login Failed",
-            description: error.message,
-            variant: "destructive",
-          })
-        } else if (data.session) {
-          setSession(data.session)
-          setIsAuthenticated(true)
-          loadConfig(data.session.access_token)
-          loadContentData(data.session.access_token)
-          toast({
-            title: "Login Successful",
-            description: "Welcome to the admin panel.",
-          })
-        }
+      } else if (data.session) {
+        setSession(data.session)
+        setIsAuthenticated(true)
+        loadConfig(data.session.access_token)
+        loadContentData(data.session.access_token)
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin panel.",
+        })
       }
     } catch (error) {
       toast({
@@ -459,7 +437,7 @@ export function AdminPage() {
               <Lock className="h-12 w-12 text-amber-700" />
             </div>
             <CardTitle className="text-2xl font-bold text-stone-900">Admin Access</CardTitle>
-            <p className="text-stone-600">{isSignupMode ? 'Create admin account' : 'Enter your admin credentials to continue'}</p>
+            <p className="text-stone-600">Enter your admin credentials to continue</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -490,15 +468,7 @@ export function AdminPage() {
                 className="w-full bg-amber-700 hover:bg-amber-800"
                 disabled={loading}
               >
-                {loading ? (isSignupMode ? 'Creating Account...' : 'Authenticating...') : (isSignupMode ? 'Create Admin Account' : 'Login')}
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline"
-                className="w-full"
-                onClick={() => setIsSignupMode(!isSignupMode)}
-              >
-                {isSignupMode ? 'Back to Login' : 'Create Admin Account'}
+                {loading ? 'Authenticating...' : 'Login'}
               </Button>
             </form>
           </CardContent>
