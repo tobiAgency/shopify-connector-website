@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import { Settings, Eye, EyeOff, Loader2, Save, Plus, Edit, Trash2, X } from 'lucide-react'
+import { Settings, Eye, EyeOff, Loader2, Save, Plus, Edit, Trash2, X, Building } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 
@@ -59,6 +59,10 @@ export function AdminPage() {
   const [contentLoading, setContentLoading] = useState(false)
   const [formData, setFormData] = useState<any>({})
   const [activeSection, setActiveSection] = useState('shopify')
+  const [companies, setCompanies] = useState<any[]>([])
+  const [companyLoading, setCompanyLoading] = useState(false)
+  const [companyName, setCompanyName] = useState('')
+  const [editingCompany, setEditingCompany] = useState<any>(null)
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -71,6 +75,7 @@ export function AdminPage() {
         setIsAuthenticated(true)
         loadConfig()
         loadContentData()
+        loadCompanyData()
       }
     }
     checkAuth()
@@ -80,6 +85,7 @@ export function AdminPage() {
         setIsAuthenticated(true)
         loadConfig()
         loadContentData()
+        loadCompanyData()
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false)
       }
@@ -129,14 +135,19 @@ export function AdminPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
-      const response = await fetch(`${API_URL}/api/admin/config`, {
+      const response = await fetch(`${API_URL}/api/admin/company-config`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       })
       if (response.ok) {
         const data = await response.json()
-        setConfig(data)
+        setConfig({
+          shop_domain: data.shopify?.shop_url || '',
+          access_token: data.shopify?.api_key || '',
+          supabase_url: data.supabase?.url || '',
+          supabase_anon_key: data.supabase?.annon || ''
+        })
       }
     } catch (error) {
       console.error('Failed to load config:', error)
@@ -156,20 +167,24 @@ export function AdminPage() {
         return
       }
 
-      const cleanedConfig = {
-        shop_domain: config.shop_domain || '',
-        access_token: config.access_token || '',
-        supabase_url: config.supabase_url || '',
-        supabase_anon_key: config.supabase_anon_key || ''
+      const configData = {
+        shopify: {
+          shop_domain: config.shop_domain || '',
+          access_token: config.access_token || ''
+        },
+        supabase: {
+          supabase_url: config.supabase_url || '',
+          supabase_anon_key: config.supabase_anon_key || ''
+        }
       }
 
-      const response = await fetch(`${API_URL}/api/admin/config`, {
+      const response = await fetch(`${API_URL}/api/admin/company-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify(cleanedConfig)
+        body: JSON.stringify(configData)
       })
 
       if (response.ok) {
@@ -420,6 +435,131 @@ export function AdminPage() {
     setFormData({})
   }
 
+  const loadCompanyData = async () => {
+    try {
+      setCompanyLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const response = await fetch(`${API_URL}/api/admin/company`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCompanies(data.companies || [])
+        if (data.companies && data.companies.length > 0) {
+          setCompanyName(data.companies[0].name || '')
+          setEditingCompany(data.companies[0])
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load company data:', error)
+    } finally {
+      setCompanyLoading(false)
+    }
+  }
+
+  const handleCreateCompany = async () => {
+    if (!companyName.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Company name is required",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setCompanyLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const response = await fetch(`${API_URL}/api/admin/company`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ name: companyName })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Company created successfully",
+        })
+        loadCompanyData()
+      } else {
+        const errorData = await response.json()
+        toast({
+          title: "Error",
+          description: errorData.detail || "Failed to create company",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setCompanyLoading(false)
+    }
+  }
+
+  const handleUpdateCompany = async () => {
+    if (!companyName.trim() || !editingCompany) {
+      toast({
+        title: "Validation Error",
+        description: "Company name is required",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setCompanyLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const response = await fetch(`${API_URL}/api/admin/company/${editingCompany.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ name: companyName })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Company updated successfully",
+        })
+        loadCompanyData()
+      } else {
+        const errorData = await response.json()
+        toast({
+          title: "Error",
+          description: errorData.detail || "Failed to update company",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setCompanyLoading(false)
+    }
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate('/')
@@ -475,6 +615,7 @@ export function AdminPage() {
   const sidebarItems = [
     { id: 'shopify', label: 'Shopify Configuration', icon: Settings },
     { id: 'supabase', label: 'Supabase Configuration', icon: Settings },
+    { id: 'company', label: 'Company', icon: Building },
     { id: 'content', label: 'Content Management', icon: Settings },
   ]
 
@@ -664,6 +805,54 @@ export function AdminPage() {
                     )}
                   </AlertDescription>
                 </Alert>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'company' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Company Management</CardTitle>
+              <p className="text-stone-600">Manage your company information</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {companyLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="companyName">Company Name</Label>
+                    <Input
+                      id="companyName"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="Enter company name"
+                    />
+                  </div>
+                  
+                  {companies.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-stone-600">
+                        Current Company: <strong>{editingCompany?.name}</strong> (ID: {editingCompany?.id})
+                      </p>
+                      <Button onClick={handleUpdateCompany} disabled={companyLoading}>
+                        {companyLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                        Update Company
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-stone-600">No company found. Create your first company.</p>
+                      <Button onClick={handleCreateCompany} disabled={companyLoading}>
+                        {companyLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                        Create Company
+                      </Button>
+                    </div>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>

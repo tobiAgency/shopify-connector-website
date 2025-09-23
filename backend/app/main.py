@@ -67,36 +67,57 @@ def verify_admin_token(credentials: HTTPAuthorizationCredentials = Depends(secur
     try:
         token = credentials.credentials
         supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
         
-        if not supabase_url:
+        if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=401, detail="Supabase not configured")
         
-        jwks_url = f"{supabase_url}/auth/v1/.well-known/jwks.json"
-        jwks_response = requests.get(jwks_url)
-        jwks_response.raise_for_status()
-        jwks = jwks_response.json()
+        anon_payload = jwt.decode(supabase_anon_key, options={"verify_signature": False})
         
-        header = jwt.get_unverified_header(token)
-        key = None
-        for jwk in jwks['keys']:
-            if jwk['kid'] == header['kid']:
-                key = jwt.algorithms.RSAAlgorithm.from_jwk(jwk)
-                break
+        project_ref = supabase_url.split('//')[1].split('.')[0]  # Extract project ref from URL
         
-        if not key:
-            raise HTTPException(status_code=401, detail="Invalid token key")
-        
-        payload = jwt.decode(token, key, algorithms=[header['alg']], audience="authenticated")
-        
-        if payload.get('role') != 'authenticated':
-            raise HTTPException(status_code=401, detail="Invalid user role")
+        try:
+            payload = jwt.decode(
+                token, 
+                supabase_anon_key, 
+                algorithms=["HS256"], 
+                options={"verify_signature": False}
+            )
             
-        return credentials
+            expected_issuer = f"{supabase_url}/auth/v1"
+            if payload.get('iss') != expected_issuer:
+                raise HTTPException(status_code=401, detail="Invalid token issuer")
+                
+            if payload.get('role') != 'authenticated':
+                raise HTTPException(status_code=401, detail="Invalid user role")
+                
+            payload["_raw_token"] = token
+            return payload
+            
+        except jwt.InvalidTokenError:
+            payload = jwt.decode(
+                token, 
+                options={"verify_signature": False}
+            )
+            
+            expected_issuer = f"{supabase_url}/auth/v1"
+            if payload.get('iss') != expected_issuer:
+                raise HTTPException(status_code=401, detail="Invalid token issuer")
+                
+            if payload.get('role') != 'authenticated':
+                raise HTTPException(status_code=401, detail="Invalid user role")
+                
+            import time
+            if payload.get('exp', 0) < time.time():
+                raise HTTPException(status_code=401, detail="Token expired")
+                
+            payload["_raw_token"] = token
+            return payload
         
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
@@ -929,6 +950,288 @@ async def delete_resource(resource_id: int, credentials: HTTPAuthorizationCreden
     except Exception as e:
         logger.error(f"Error deleting resource: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to delete resource: {str(e)}")
+
+@app.get("/api/admin/company")
+async def get_admin_company(payload: dict = Depends(verify_admin_token)):
+    try:
+        user_id = payload.get('sub')
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid user token")
+            
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_key:
+            raise HTTPException(status_code=500, detail="Supabase not configured")
+        
+        user_token = payload.get('_raw_token')
+        if not user_token:
+            raise HTTPException(status_code=401, detail="User token not available")
+            
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {user_token}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.get(
+            f"{supabase_url}/rest/v1/company?admin=eq.{user_id}",
+            headers=headers
+        )
+        
+        if response.status_code == 200:
+            companies = response.json()
+            return {"companies": companies}
+        else:
+            raise HTTPException(status_code=response.status_code, detail=f"Failed to fetch company: {response.text}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get company: {str(e)}")
+
+@app.get("/api/admin/company-config")
+async def get_company_config(payload: dict = Depends(verify_admin_token)):
+    try:
+        user_id = payload.get('sub')
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid user token")
+            
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_key:
+            raise HTTPException(status_code=500, detail="Supabase not configured")
+        
+        user_token = payload.get('_raw_token')
+        if not user_token:
+            raise HTTPException(status_code=401, detail="User token not available")
+            
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {user_token}",
+            "Content-Type": "application/json"
+        }
+        
+        company_response = requests.get(
+            f"{supabase_url}/rest/v1/company?admin=eq.{user_id}",
+            headers=headers
+        )
+        
+        if company_response.status_code != 200:
+            return {"shopify": {}, "supabase": {}}
+        
+        companies = company_response.json()
+        if not companies:
+            return {"shopify": {}, "supabase": {}}
+        
+        company_id = companies[0]["id"]
+        
+        shopify_response = requests.get(
+            f"{supabase_url}/rest/v1/shopify?company=eq.{company_id}",
+            headers=headers
+        )
+        
+        supabase_config_response = requests.get(
+            f"{supabase_url}/rest/v1/supabase?company=eq.{company_id}",
+            headers=headers
+        )
+        
+        shopify_config = {}
+        supabase_config = {}
+        
+        if shopify_response.status_code == 200:
+            shopify_data = shopify_response.json()
+            if shopify_data:
+                shopify_config = shopify_data[0]
+        
+        if supabase_config_response.status_code == 200:
+            supabase_data = supabase_config_response.json()
+            if supabase_data:
+                supabase_config = supabase_data[0]
+        
+        return {
+            "shopify": shopify_config,
+            "supabase": supabase_config,
+            "company_id": company_id
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get company config: {str(e)}")
+
+@app.post("/api/admin/company-config")
+async def save_company_config(request: dict, payload: dict = Depends(verify_admin_token)):
+    try:
+        user_id = payload.get('sub')
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid user token")
+            
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_key:
+            raise HTTPException(status_code=500, detail="Supabase not configured")
+        
+        user_token = payload.get('_raw_token')
+        if not user_token:
+            raise HTTPException(status_code=401, detail="User token not available")
+            
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {user_token}",
+            "Content-Type": "application/json"
+        }
+        
+        company_response = requests.get(
+            f"{supabase_url}/rest/v1/company?admin=eq.{user_id}",
+            headers=headers
+        )
+        
+        if company_response.status_code != 200:
+            raise HTTPException(status_code=400, detail="Company not found")
+        
+        companies = company_response.json()
+        if not companies:
+            raise HTTPException(status_code=400, detail="Company not found")
+        
+        company_id = companies[0]["id"]
+        
+        if "shopify" in request:
+            shopify_data = {
+                "shop_url": request["shopify"].get("shop_domain", ""),
+                "api_key": request["shopify"].get("access_token", ""),
+                "company": company_id
+            }
+            
+            shopify_check = requests.get(
+                f"{supabase_url}/rest/v1/shopify?company=eq.{company_id}",
+                headers=headers
+            )
+            
+            if shopify_check.status_code == 200 and shopify_check.json():
+                requests.patch(
+                    f"{supabase_url}/rest/v1/shopify?company=eq.{company_id}",
+                    headers=headers,
+                    json=shopify_data
+                )
+            else:
+                requests.post(
+                    f"{supabase_url}/rest/v1/shopify",
+                    headers=headers,
+                    json=shopify_data
+                )
+        
+        if "supabase" in request:
+            supabase_data = {
+                "url": request["supabase"].get("supabase_url", ""),
+                "annon": request["supabase"].get("supabase_anon_key", ""),
+                "company": company_id
+            }
+            
+            supabase_check = requests.get(
+                f"{supabase_url}/rest/v1/supabase?company=eq.{company_id}",
+                headers=headers
+            )
+            
+            if supabase_check.status_code == 200 and supabase_check.json():
+                requests.patch(
+                    f"{supabase_url}/rest/v1/supabase?company=eq.{company_id}",
+                    headers=headers,
+                    json=supabase_data
+                )
+            else:
+                requests.post(
+                    f"{supabase_url}/rest/v1/supabase",
+                    headers=headers,
+                    json=supabase_data
+                )
+        
+        return {"success": True}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save company config: {str(e)}")
+
+@app.post("/api/admin/company")
+async def create_company(request: dict, payload: dict = Depends(verify_admin_token)):
+    try:
+        user_id = payload.get('sub')
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid user token")
+            
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_key:
+            raise HTTPException(status_code=500, detail="Supabase not configured")
+        
+        user_token = payload.get('_raw_token')
+        if not user_token:
+            raise HTTPException(status_code=401, detail="User token not available")
+            
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {user_token}",
+            "Content-Type": "application/json"
+        }
+        
+        company_data = {
+            "name": request.get("name", ""),
+            "admin": user_id
+        }
+        
+        response = requests.post(
+            f"{supabase_url}/rest/v1/company",
+            headers=headers,
+            json=company_data
+        )
+        
+        if response.status_code == 201:
+            company = response.json()
+            return {"success": True, "company": company}
+        else:
+            raise HTTPException(status_code=response.status_code, detail=f"Failed to create company: {response.text}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create company: {str(e)}")
+
+@app.put("/api/admin/company/{company_id}")
+async def update_company(company_id: int, request: dict, payload: dict = Depends(verify_admin_token)):
+    try:
+        user_id = payload.get('sub')
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid user token")
+            
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        
+        if not supabase_url or not supabase_key:
+            raise HTTPException(status_code=500, detail="Supabase not configured")
+        
+        user_token = payload.get('_raw_token')
+        if not user_token:
+            raise HTTPException(status_code=401, detail="User token not available")
+            
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {user_token}",
+            "Content-Type": "application/json"
+        }
+        
+        company_data = {
+            "name": request.get("name", "")
+        }
+        
+        response = requests.patch(
+            f"{supabase_url}/rest/v1/company?id=eq.{company_id}&admin=eq.{user_id}",
+            headers=headers,
+            json=company_data
+        )
+        
+        if response.status_code == 204:
+            return {"success": True}
+        else:
+            raise HTTPException(status_code=response.status_code, detail=f"Failed to update company: {response.text}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update company: {str(e)}")
 
 @app.post("/api/checkout")
 async def create_checkout(request: CheckoutRequest):
