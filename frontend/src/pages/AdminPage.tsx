@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Textarea } from '../components/ui/textarea'
-import { Label } from '../components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
-import { Alert, AlertDescription } from '../components/ui/alert'
-import { Eye, EyeOff, Save, Lock, Settings, Plus, Edit, Trash2, X, Loader2 } from 'lucide-react'
-import { useToast } from '../hooks/use-toast'
-import { Course, BlogPost, Resource, supabase } from '../lib/supabase'
-import type { Session } from '@supabase/supabase-js'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
+import { Settings, Eye, EyeOff, Loader2, Save, Plus, Edit, Trash2, X } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { cn } from '@/lib/utils'
 
-interface AdminConfig {
-  shopify_shop_url: string
-  shopify_access_token: string
-  shopify_api_version: string
+interface Config {
+  shop_domain: string
+  access_token: string
   supabase_url: string
   supabase_anon_key: string
 }
@@ -24,62 +23,66 @@ export function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [session, setSession] = useState<Session | null>(null)
-  const [config, setConfig] = useState<AdminConfig>({
-    shopify_shop_url: '',
-    shopify_access_token: '',
-    shopify_api_version: '2023-10',
+  const [loading, setLoading] = useState(false)
+  const [config, setConfig] = useState<Config>({
+    shop_domain: '',
+    access_token: '',
     supabase_url: '',
     supabase_anon_key: ''
   })
   const [showTokens, setShowTokens] = useState({
-    shopify_access_token: false,
+    access_token: false,
     supabase_anon_key: false
   })
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<{
-    success: boolean;
-    message: string;
-    error?: string;
-    shop_name?: string;
-    shop_domain?: string;
+    success: boolean
+    message: string
+    shop_name?: string
+    error?: string
   } | null>(null)
-  const [testingConnection, setTestingConnection] = useState(false)
   const [supabaseConnectionStatus, setSupabaseConnectionStatus] = useState<{
-    success: boolean;
-    message: string;
-    error?: string;
-    url?: string;
-    status_code?: number;
+    success: boolean
+    message: string
+    url?: string
+    status_code?: number
+    error?: string
   } | null>(null)
+  const [testingShopifyConnection, setTestingShopifyConnection] = useState(false)
   const [testingSupabaseConnection, setTestingSupabaseConnection] = useState(false)
-  const [courses, setCourses] = useState<Course[]>([])
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
-  const [resources, setResources] = useState<Resource[]>([])
+  const [courses, setCourses] = useState<any[]>([])
+  const [blogPosts, setBlogPosts] = useState<any[]>([])
+  const [resources, setResources] = useState<any[]>([])
   const [activeContentTab, setActiveContentTab] = useState<'courses' | 'blogs' | 'resources'>('courses')
-  const [editingItem, setEditingItem] = useState<any>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [editingItem, setEditingItem] = useState<any>(null)
   const [contentLoading, setContentLoading] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const [activeSection, setActiveSection] = useState('shopify')
   const { toast } = useToast()
   const navigate = useNavigate()
 
   const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:8000'
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setIsAuthenticated(!!session)
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        loadConfig(session.access_token)
-        loadContentData(session.access_token)
+        setIsAuthenticated(true)
+        loadConfig()
+        loadContentData()
       }
-    })
+    }
+    checkAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setIsAuthenticated(!!session)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setIsAuthenticated(true)
+        loadConfig()
+        loadContentData()
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -101,43 +104,39 @@ export function AdminPage() {
           description: error.message,
           variant: "destructive",
         })
-      } else if (data.session) {
-        setSession(data.session)
-        setIsAuthenticated(true)
-        loadConfig(data.session.access_token)
-        loadContentData(data.session.access_token)
+      } else if (data.user) {
         toast({
           title: "Login Successful",
-          description: "Welcome to the admin panel.",
+          description: "Welcome to the admin panel!",
         })
+        setIsAuthenticated(true)
+        loadConfig()
+        loadContentData()
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to connect to Supabase.",
+        title: "Login Error",
+        description: "An unexpected error occurred",
         variant: "destructive",
       })
     } finally {
       setLoading(false)
-      setEmail('')
-      setPassword('')
     }
   }
 
-  const loadConfig = async (token?: string) => {
-    const authToken = token || session?.access_token
-    if (!authToken) return
-    
+  const loadConfig = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
       const response = await fetch(`${API_URL}/api/admin/config`, {
         headers: {
-          'Authorization': `Bearer ${authToken}`
+          'Authorization': `Bearer ${session.access_token}`
         }
       })
-      
       if (response.ok) {
         const data = await response.json()
-        setConfig(data.config)
+        setConfig(data)
       }
     } catch (error) {
       console.error('Failed to load config:', error)
@@ -146,51 +145,52 @@ export function AdminPage() {
 
   const handleSaveConfig = async () => {
     setSaving(true)
-    
     try {
-      let cleanShopUrl = config.shopify_shop_url.trim()
-      
-      cleanShopUrl = cleanShopUrl.replace(/^https?:\/\//, '')
-      
-      cleanShopUrl = cleanShopUrl.split('/')[0]
-      
-      if (cleanShopUrl && !cleanShopUrl.includes('.myshopify.com')) {
-        if (!cleanShopUrl.includes('.')) {
-          cleanShopUrl = `${cleanShopUrl}.myshopify.com`
-        }
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in again",
+          variant: "destructive",
+        })
+        return
       }
-      
+
       const cleanedConfig = {
-        ...config,
-        shopify_shop_url: cleanShopUrl
+        shop_domain: config.shop_domain || '',
+        access_token: config.access_token || '',
+        supabase_url: config.supabase_url || '',
+        supabase_anon_key: config.supabase_anon_key || ''
       }
-      
+
       const response = await fetch(`${API_URL}/api/admin/config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`
+          'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ config: cleanedConfig }),
+        body: JSON.stringify(cleanedConfig)
       })
 
       if (response.ok) {
-        setConfig(cleanedConfig)
         toast({
           title: "Configuration Saved",
-          description: "All settings have been updated successfully.",
+          description: "Your settings have been updated successfully.",
         })
+        setConnectionStatus(null)
+        setSupabaseConnectionStatus(null)
       } else {
+        const errorData = await response.json()
         toast({
           title: "Save Failed",
-          description: "Failed to save configuration. Please try again.",
+          description: errorData.detail || "Failed to save configuration",
           variant: "destructive",
         })
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save configuration.",
+        title: "Save Error",
+        description: "An unexpected error occurred while saving",
         variant: "destructive",
       })
     } finally {
@@ -199,52 +199,58 @@ export function AdminPage() {
   }
 
   const testShopifyConnection = async () => {
-    if (!session?.access_token) return
-    
-    setTestingConnection(true)
-    setConnectionStatus(null)
-
+    setTestingShopifyConnection(true)
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
       const response = await fetch(`${API_URL}/api/admin/test-shopify`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
-        }
+        },
+        body: JSON.stringify({
+          shop_domain: config.shop_domain,
+          access_token: config.access_token
+        })
       })
-      
       const result = await response.json()
       setConnectionStatus(result)
     } catch (error) {
       setConnectionStatus({
         success: false,
-        message: 'Failed to test connection',
+        message: 'Connection test failed',
         error: 'Network error'
       })
     } finally {
-      setTestingConnection(false)
+      setTestingShopifyConnection(false)
     }
   }
 
   const testSupabaseConnection = async () => {
-    if (!session?.access_token) return
-    
     setTestingSupabaseConnection(true)
-    setSupabaseConnectionStatus(null)
-
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
       const response = await fetch(`${API_URL}/api/admin/test-supabase`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
-        }
+        },
+        body: JSON.stringify({
+          supabase_url: config.supabase_url,
+          supabase_anon_key: config.supabase_anon_key
+        })
       })
-      
       const result = await response.json()
       setSupabaseConnectionStatus(result)
     } catch (error) {
       setSupabaseConnectionStatus({
         success: false,
-        message: 'Failed to test connection',
+        message: 'Connection test failed',
         error: 'Network error'
       })
     } finally {
@@ -252,24 +258,32 @@ export function AdminPage() {
     }
   }
 
-  const fetchContent = async (type: string, token?: string) => {
-    const authToken = token || session?.access_token
-    if (!authToken) return []
+  const fetchContent = async (type: string) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return []
+
       const response = await fetch(`${API_URL}/api/admin/${type}`, {
-        headers: { 'Authorization': `Bearer ${authToken}` }
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
       })
-      const data = await response.json()
-      return data[type] || []
+      if (response.ok) {
+        const data = await response.json()
+        return data.items || []
+      }
+      return []
     } catch (error) {
-      console.error(`Error fetching ${type}:`, error)
+      console.error(`Failed to fetch ${type}:`, error)
       return []
     }
   }
 
   const createContent = async (type: string, data: any) => {
-    if (!session?.access_token) return false
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return null
+
       const response = await fetch(`${API_URL}/api/admin/${type}`, {
         method: 'POST',
         headers: {
@@ -278,16 +292,21 @@ export function AdminPage() {
         },
         body: JSON.stringify(data)
       })
-      return response.ok
+      if (response.ok) {
+        return await response.json()
+      }
+      return null
     } catch (error) {
-      console.error(`Error creating ${type}:`, error)
-      return false
+      console.error(`Failed to create ${type}:`, error)
+      return null
     }
   }
 
   const updateContent = async (type: string, id: number, data: any) => {
-    if (!session?.access_token) return false
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return null
+
       const response = await fetch(`${API_URL}/api/admin/${type}/${id}`, {
         method: 'PUT',
         headers: {
@@ -296,16 +315,21 @@ export function AdminPage() {
         },
         body: JSON.stringify(data)
       })
-      return response.ok
+      if (response.ok) {
+        return await response.json()
+      }
+      return null
     } catch (error) {
-      console.error(`Error updating ${type}:`, error)
-      return false
+      console.error(`Failed to update ${type}:`, error)
+      return null
     }
   }
 
   const deleteContent = async (type: string, id: number) => {
-    if (!session?.access_token) return false
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return false
+
       const response = await fetch(`${API_URL}/api/admin/${type}/${id}`, {
         method: 'DELETE',
         headers: {
@@ -314,24 +338,24 @@ export function AdminPage() {
       })
       return response.ok
     } catch (error) {
-      console.error(`Error deleting ${type}:`, error)
+      console.error(`Failed to delete ${type}:`, error)
       return false
     }
   }
 
-  const loadContentData = async (token?: string) => {
+  const loadContentData = async () => {
     setContentLoading(true)
     try {
       const [coursesData, blogsData, resourcesData] = await Promise.all([
-        fetchContent('courses', token),
-        fetchContent('blogs', token),
-        fetchContent('resources', token)
+        fetchContent('courses'),
+        fetchContent('blogs'),
+        fetchContent('resources')
       ])
       setCourses(coursesData)
       setBlogPosts(blogsData)
       setResources(resourcesData)
     } catch (error) {
-      console.error('Error loading content data:', error)
+      console.error('Failed to load content data:', error)
     } finally {
       setContentLoading(false)
     }
@@ -339,73 +363,55 @@ export function AdminPage() {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const success = await createContent(activeContentTab, formData)
-    if (success) {
+    const result = await createContent(activeContentTab, formData)
+    if (result) {
       toast({
-        title: "Success",
-        description: `${activeContentTab.slice(0, -1)} created successfully`,
+        title: "Created Successfully",
+        description: `${activeContentTab.slice(0, -1)} created successfully.`,
       })
-      setShowCreateForm(false)
-      setFormData({})
       loadContentData()
-    } else {
-      toast({
-        title: "Error",
-        description: `Failed to create ${activeContentTab.slice(0, -1)}`,
-        variant: "destructive",
-      })
+      cancelForm()
     }
   }
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const success = await updateContent(activeContentTab, editingItem.id, formData)
-    if (success) {
-      toast({
-        title: "Success",
-        description: `${activeContentTab.slice(0, -1)} updated successfully`,
-      })
-      setEditingItem(null)
-      setFormData({})
-      loadContentData()
-    } else {
-      toast({
-        title: "Error",
-        description: `Failed to update ${activeContentTab.slice(0, -1)}`,
-        variant: "destructive",
-      })
+    if (editingItem) {
+      const result = await updateContent(activeContentTab, editingItem.id, formData)
+      if (result) {
+        toast({
+          title: "Updated Successfully",
+          description: `${activeContentTab.slice(0, -1)} updated successfully.`,
+        })
+        loadContentData()
+        cancelForm()
+      }
     }
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm(`Are you sure you want to delete this ${activeContentTab.slice(0, -1)}?`)) return
-    
-    const success = await deleteContent(activeContentTab, id)
-    if (success) {
-      toast({
-        title: "Success",
-        description: `${activeContentTab.slice(0, -1)} deleted successfully`,
-      })
-      loadContentData()
-    } else {
-      toast({
-        title: "Error",
-        description: `Failed to delete ${activeContentTab.slice(0, -1)}`,
-        variant: "destructive",
-      })
+    if (confirm('Are you sure you want to delete this item?')) {
+      const success = await deleteContent(activeContentTab, id)
+      if (success) {
+        toast({
+          title: "Deleted Successfully",
+          description: `${activeContentTab.slice(0, -1)} deleted successfully.`,
+        })
+        loadContentData()
+      }
     }
   }
 
   const startEdit = (item: any) => {
     setEditingItem(item)
     setFormData(item)
-    setShowCreateForm(false)
+    setShowCreateForm(true)
   }
 
   const startCreate = () => {
-    setShowCreateForm(true)
     setEditingItem(null)
     setFormData({})
+    setShowCreateForm(true)
   }
 
   const cancelForm = () => {
@@ -416,8 +422,6 @@ export function AdminPage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    setIsAuthenticated(false)
-    setSession(null)
     navigate('/')
   }
 
@@ -430,14 +434,10 @@ export function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <Lock className="h-12 w-12 text-amber-700" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-stone-900">Admin Access</CardTitle>
-            <p className="text-stone-600">Enter your admin credentials to continue</p>
+          <CardHeader>
+            <CardTitle className="text-center">Admin Login</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -448,7 +448,6 @@ export function AdminPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter admin email"
                   required
                 />
               </div>
@@ -459,16 +458,12 @@ export function AdminPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
                   required
                 />
               </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-amber-700 hover:bg-amber-800"
-                disabled={loading}
-              >
-                {loading ? 'Authenticating...' : 'Login'}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Login
               </Button>
             </form>
           </CardContent>
@@ -477,188 +472,209 @@ export function AdminPage() {
     )
   }
 
+  const sidebarItems = [
+    { id: 'shopify', label: 'Shopify Configuration', icon: Settings },
+    { id: 'supabase', label: 'Supabase Configuration', icon: Settings },
+    { id: 'content', label: 'Content Management', icon: Settings },
+  ]
+
   return (
-    <div className="min-h-screen bg-stone-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen bg-stone-50 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-lg flex flex-col">
+        <div className="p-6 border-b">
           <div className="flex items-center space-x-3">
             <Settings className="h-8 w-8 text-amber-700" />
-            <h1 className="text-3xl font-bold text-stone-900">Admin Panel</h1>
+            <h1 className="text-xl font-bold text-stone-900">Admin Panel</h1>
           </div>
-          <Button onClick={handleLogout} variant="outline">
+        </div>
+        
+        <nav className="flex-1 p-4">
+          <ul className="space-y-2">
+            {sidebarItems.map((item) => (
+              <li key={item.id}>
+                <button
+                  onClick={() => setActiveSection(item.id)}
+                  className={cn(
+                    "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors",
+                    activeSection === item.id
+                      ? "bg-amber-100 text-amber-800 font-medium"
+                      : "text-stone-600 hover:bg-stone-100"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        
+        <div className="mt-auto p-4">
+          <Button onClick={handleLogout} variant="outline" className="w-full">
             Logout
           </Button>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="flex-1 p-8">
         <Alert className="mb-6">
           <AlertDescription>
             Configure your API credentials and settings below. Changes will be applied immediately to your application.
           </AlertDescription>
         </Alert>
 
-        <Tabs defaultValue="shopify" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="shopify">Shopify Configuration</TabsTrigger>
-            <TabsTrigger value="supabase">Supabase Configuration</TabsTrigger>
-            <TabsTrigger value="content">Content Management</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="shopify">
-            <Card>
-              <CardHeader>
-                <CardTitle>Shopify API Settings</CardTitle>
-                <p className="text-stone-600">Configure your Shopify store connection</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="shopify_shop_url">Shop URL</Label>
+        {activeSection === 'shopify' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Shopify API Settings</CardTitle>
+              <p className="text-stone-600">Configure your Shopify store connection</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="shop_domain">Shop Domain</Label>
+                <Input
+                  id="shop_domain"
+                  value={config.shop_domain}
+                  onChange={(e) => setConfig({...config, shop_domain: e.target.value})}
+                  placeholder="your-shop.myshopify.com"
+                />
+              </div>
+              <div>
+                <Label htmlFor="access_token">Access Token</Label>
+                <div className="relative">
                   <Input
-                    id="shopify_shop_url"
-                    value={config.shopify_shop_url}
-                    onChange={(e) => setConfig(prev => ({ ...prev, shopify_shop_url: e.target.value }))}
-                    placeholder="your-shop-name.myshopify.com"
+                    id="access_token"
+                    type={showTokens.access_token ? "text" : "password"}
+                    value={config.access_token}
+                    onChange={(e) => setConfig({...config, access_token: e.target.value})}
+                    placeholder="shpat_..."
                   />
-                  <p className="text-sm text-stone-600 mt-1">
-                    Enter just the shop name (e.g., "my-shop.myshopify.com" or "my-shop")
-                  </p>
-                </div>
-                
-                <div>
-                  <Label htmlFor="shopify_access_token">Access Token</Label>
-                  <div className="relative">
-                    <Input
-                      id="shopify_access_token"
-                      type={showTokens.shopify_access_token ? 'text' : 'password'}
-                      value={config.shopify_access_token}
-                      onChange={(e) => setConfig(prev => ({ ...prev, shopify_access_token: e.target.value }))}
-                      placeholder="Enter your Shopify access token"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                      onClick={() => toggleTokenVisibility('shopify_access_token')}
-                    >
-                      {showTokens.shopify_access_token ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="shopify_api_version">API Version</Label>
-                  <Input
-                    id="shopify_api_version"
-                    value={config.shopify_api_version}
-                    onChange={(e) => setConfig(prev => ({ ...prev, shopify_api_version: e.target.value }))}
-                    placeholder="2023-10"
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <Button 
-                    onClick={testShopifyConnection}
-                    disabled={testingConnection}
-                    variant="outline"
-                    className="border-amber-700 text-amber-700 hover:bg-amber-50"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => toggleTokenVisibility('access_token')}
                   >
-                    {testingConnection ? 'Testing...' : 'Test Connection'}
+                    {showTokens.access_token ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={testShopifyConnection}
+                  disabled={testingShopifyConnection}
+                  variant="outline"
+                >
+                  {testingShopifyConnection ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : null}
+                  Test Shopify Connection
+                </Button>
+              </div>
+              {connectionStatus && (
+                <Alert className={connectionStatus.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+                  <AlertDescription className={connectionStatus.success ? "text-green-800" : "text-red-800"}>
+                    {connectionStatus.message}
+                    {connectionStatus.success && connectionStatus.shop_name && (
+                      <div className="mt-1 text-sm">
+                        Connected to: {connectionStatus.shop_name}
+                      </div>
+                    )}
+                    {!connectionStatus.success && connectionStatus.error && (
+                      <div className="mt-1 text-sm">Error: {connectionStatus.error}</div>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-                {connectionStatus && (
-                  <Alert className={connectionStatus.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
-                    <AlertDescription className={connectionStatus.success ? "text-green-800" : "text-red-800"}>
-                      <div className="font-medium">{connectionStatus.message}</div>
-                      {connectionStatus.success && connectionStatus.shop_name && (
-                        <div className="mt-1 text-sm">
-                          Connected to: {connectionStatus.shop_name} ({connectionStatus.shop_domain})
-                        </div>
-                      )}
-                      {!connectionStatus.success && connectionStatus.error && (
-                        <div className="mt-1 text-sm">Error: {connectionStatus.error}</div>
-                      )}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="supabase">
-            <Card>
-              <CardHeader>
-                <CardTitle>Supabase Configuration</CardTitle>
-                <p className="text-stone-600">Configure your Supabase database connection</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="supabase_url">Supabase URL</Label>
+        {activeSection === 'supabase' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Supabase Configuration</CardTitle>
+              <p className="text-stone-600">Configure your Supabase database connection</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="supabase_url">Supabase URL</Label>
+                <Input
+                  id="supabase_url"
+                  value={config.supabase_url}
+                  onChange={(e) => setConfig({...config, supabase_url: e.target.value})}
+                  placeholder="https://your-project.supabase.co"
+                />
+              </div>
+              <div>
+                <Label htmlFor="supabase_anon_key">Supabase Anonymous Key</Label>
+                <div className="relative">
                   <Input
-                    id="supabase_url"
-                    value={config.supabase_url}
-                    onChange={(e) => setConfig(prev => ({ ...prev, supabase_url: e.target.value }))}
-                    placeholder="https://your-project.supabase.co"
+                    id="supabase_anon_key"
+                    type={showTokens.supabase_anon_key ? "text" : "password"}
+                    value={config.supabase_anon_key}
+                    onChange={(e) => setConfig({...config, supabase_anon_key: e.target.value})}
+                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                   />
-                </div>
-
-                <div>
-                  <Label htmlFor="supabase_anon_key">Anonymous Key</Label>
-                  <div className="relative">
-                    <Input
-                      id="supabase_anon_key"
-                      type={showTokens.supabase_anon_key ? 'text' : 'password'}
-                      value={config.supabase_anon_key}
-                      onChange={(e) => setConfig(prev => ({ ...prev, supabase_anon_key: e.target.value }))}
-                      placeholder="Enter your Supabase anonymous key"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                      onClick={() => toggleTokenVisibility('supabase_anon_key')}
-                    >
-                      {showTokens.supabase_anon_key ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button 
-                    onClick={testSupabaseConnection}
-                    disabled={testingSupabaseConnection}
-                    variant="outline"
-                    className="border-amber-700 text-amber-700 hover:bg-amber-50"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => toggleTokenVisibility('supabase_anon_key')}
                   >
-                    {testingSupabaseConnection ? 'Testing...' : 'Test Connection'}
+                    {showTokens.supabase_anon_key ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={testSupabaseConnection}
+                  disabled={testingSupabaseConnection}
+                  variant="outline"
+                >
+                  {testingSupabaseConnection ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : null}
+                  Test Supabase Connection
+                </Button>
+              </div>
+              {supabaseConnectionStatus && (
+                <Alert className={supabaseConnectionStatus.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+                  <AlertDescription className={supabaseConnectionStatus.success ? "text-green-800" : "text-red-800"}>
+                    {supabaseConnectionStatus.message}
+                    {supabaseConnectionStatus.success && supabaseConnectionStatus.url && (
+                      <div className="mt-1 text-sm">
+                        Connected to: {supabaseConnectionStatus.url} (Status: {supabaseConnectionStatus.status_code})
+                      </div>
+                    )}
+                    {!supabaseConnectionStatus.success && supabaseConnectionStatus.error && (
+                      <div className="mt-1 text-sm">Error: {supabaseConnectionStatus.error}</div>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-                {supabaseConnectionStatus && (
-                  <Alert className={supabaseConnectionStatus.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
-                    <AlertDescription className={supabaseConnectionStatus.success ? "text-green-800" : "text-red-800"}>
-                      <div className="font-medium">{supabaseConnectionStatus.message}</div>
-                      {supabaseConnectionStatus.success && supabaseConnectionStatus.url && (
-                        <div className="mt-1 text-sm">
-                          Connected to: {supabaseConnectionStatus.url} (Status: {supabaseConnectionStatus.status_code})
-                        </div>
-                      )}
-                      {!supabaseConnectionStatus.success && supabaseConnectionStatus.error && (
-                        <div className="mt-1 text-sm">Error: {supabaseConnectionStatus.error}</div>
-                      )}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="content">
+        {activeSection === 'content' && (
+          <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Content Management</CardTitle>
-                <CardDescription>Manage courses, blog posts, and resources</CardDescription>
+                <p className="text-stone-600">Manage courses, blog posts, and resources</p>
               </CardHeader>
               <CardContent>
                 <Tabs value={activeContentTab} onValueChange={(value) => setActiveContentTab(value as any)}>
@@ -943,8 +959,8 @@ export function AdminPage() {
                 </Tabs>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
 
         <div className="flex justify-end mt-6">
           <Button 

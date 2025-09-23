@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { CartPopup } from './components/CartPopup'
@@ -37,6 +37,7 @@ function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const { toast } = useToast()
+  const location = useLocation()
 
   const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:8000'
 
@@ -152,10 +153,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-stone-50">
-      <Header 
-        cartItems={cartItems} 
-        onCartClick={() => setIsCartOpen(true)}
-      />
+      {location.pathname !== '/admin' && (
+        <Header 
+          cartItems={cartItems} 
+          onCartClick={() => setIsCartOpen(true)}
+        />
+      )}
       
       <main>
         <Routes>
@@ -177,16 +180,19 @@ function App() {
         </Routes>
       </main>
 
-      <CartPopup
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
-        onUpdateQuantity={updateCartQuantity}
-        onRemoveItem={removeFromCart}
-        onCheckout={handleCheckout}
-      />
-
-      <Footer shopInfo={shopInfo || undefined} />
+      {location.pathname !== '/admin' && (
+        <>
+          <CartPopup
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            cartItems={cartItems}
+            onUpdateQuantity={updateCartQuantity}
+            onRemoveItem={removeFromCart}
+            onCheckout={handleCheckout}
+          />
+          <Footer shopInfo={shopInfo || undefined} />
+        </>
+      )}
       <Toaster />
     </div>
   )
