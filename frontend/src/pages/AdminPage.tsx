@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Alert, AlertDescription } from '../components/ui/alert'
 import { Eye, EyeOff, Save, Lock, Settings, Plus, Edit, Trash2, X, Loader2 } from 'lucide-react'
 import { useToast } from '../hooks/use-toast'
-import { Course, BlogPost, Resource } from '../lib/supabase'
+import { Course, BlogPost, Resource, supabase } from '../lib/supabase'
+import type { Session } from '@supabase/supabase-js'
 
 interface AdminConfig {
   shopify_shop_url: string
@@ -21,8 +22,9 @@ interface AdminConfig {
 
 export function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [adminToken, setAdminToken] = useState('')
+  const [session, setSession] = useState<Session | null>(null)
   const [config, setConfig] = useState<AdminConfig>({
     shopify_shop_url: '',
     shopify_access_token: '',
@@ -66,13 +68,21 @@ export function AdminPage() {
   const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:8000'
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('admin_token')
-    if (storedToken) {
-      setAdminToken(storedToken)
-      setIsAuthenticated(true)
-      loadConfig(storedToken)
-      loadContentData(storedToken)
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setIsAuthenticated(!!session)
+      if (session) {
+        loadConfig(session.access_token)
+        loadContentData(session.access_token)
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setIsAuthenticated(!!session)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -80,46 +90,44 @@ export function AdminPage() {
     setLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/api/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        const token = data.token
-        setAdminToken(token)
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
+        })
+      } else if (data.session) {
+        setSession(data.session)
         setIsAuthenticated(true)
-        localStorage.setItem('admin_token', token)
-        loadConfig(token)
+        loadConfig(data.session.access_token)
+        loadContentData(data.session.access_token)
         toast({
           title: "Login Successful",
           description: "Welcome to the admin panel.",
-        })
-      } else {
-        toast({
-          title: "Login Failed",
-          description: "Invalid password. Please try again.",
-          variant: "destructive",
         })
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to connect to the server.",
+        description: "Failed to connect to Supabase.",
         variant: "destructive",
       })
     } finally {
       setLoading(false)
+      setEmail('')
       setPassword('')
     }
   }
 
   const loadConfig = async (token?: string) => {
-    const authToken = token || adminToken
+    const authToken = token || session?.access_token
+    if (!authToken) return
+    
     try {
       const response = await fetch(`${API_URL}/api/admin/config`, {
         headers: {
@@ -161,7 +169,7 @@ export function AdminPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
+          'Authorization': `Bearer ${session?.access_token}`
         },
         body: JSON.stringify({ config: cleanedConfig }),
       })
@@ -191,16 +199,16 @@ export function AdminPage() {
   }
 
   const testShopifyConnection = async () => {
-    if (!adminToken) return
+    if (!session?.access_token) return
     
     setTestingConnection(true)
     setConnectionStatus(null)
-    
+
     try {
       const response = await fetch(`${API_URL}/api/admin/test-shopify`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${adminToken}`
+          'Authorization': `Bearer ${session.access_token}`
         }
       })
       
@@ -218,16 +226,16 @@ export function AdminPage() {
   }
 
   const testSupabaseConnection = async () => {
-    if (!adminToken) return
+    if (!session?.access_token) return
     
     setTestingSupabaseConnection(true)
     setSupabaseConnectionStatus(null)
-    
+
     try {
       const response = await fetch(`${API_URL}/api/admin/test-supabase`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${adminToken}`
+          'Authorization': `Bearer ${session.access_token}`
         }
       })
       
@@ -245,7 +253,7 @@ export function AdminPage() {
   }
 
   const fetchContent = async (type: string, token?: string) => {
-    const authToken = token || adminToken
+    const authToken = token || session?.access_token
     if (!authToken) return []
     try {
       const response = await fetch(`${API_URL}/api/admin/${type}`, {
@@ -260,13 +268,13 @@ export function AdminPage() {
   }
 
   const createContent = async (type: string, data: any) => {
-    if (!adminToken) return false
+    if (!session?.access_token) return false
     try {
       const response = await fetch(`${API_URL}/api/admin/${type}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify(data)
       })
@@ -278,13 +286,13 @@ export function AdminPage() {
   }
 
   const updateContent = async (type: string, id: number, data: any) => {
-    if (!adminToken) return false
+    if (!session?.access_token) return false
     try {
       const response = await fetch(`${API_URL}/api/admin/${type}/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify(data)
       })
@@ -296,12 +304,12 @@ export function AdminPage() {
   }
 
   const deleteContent = async (type: string, id: number) => {
-    if (!adminToken) return false
+    if (!session?.access_token) return false
     try {
       const response = await fetch(`${API_URL}/api/admin/${type}/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${adminToken}`
+          'Authorization': `Bearer ${session.access_token}`
         }
       })
       return response.ok
@@ -406,10 +414,10 @@ export function AdminPage() {
     setFormData({})
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
     setIsAuthenticated(false)
-    setAdminToken('')
-    localStorage.removeItem('admin_token')
+    setSession(null)
     navigate('/')
   }
 
@@ -429,10 +437,21 @@ export function AdminPage() {
               <Lock className="h-12 w-12 text-amber-700" />
             </div>
             <CardTitle className="text-2xl font-bold text-stone-900">Admin Access</CardTitle>
-            <p className="text-stone-600">Enter the admin password to continue</p>
+            <p className="text-stone-600">Enter your admin credentials to continue</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter admin email"
+                  required
+                />
+              </div>
               <div>
                 <Label htmlFor="password">Password</Label>
                 <Input
@@ -440,7 +459,7 @@ export function AdminPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter admin password"
+                  placeholder="Enter password"
                   required
                 />
               </div>

@@ -7,6 +7,8 @@ from dotenv import load_dotenv, set_key
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import logging
+import jwt
+from cryptography.hazmat.primitives import serialization
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,9 +64,41 @@ class CheckoutRequest(BaseModel):
     items: List[Dict[str, Any]]
 
 def verify_admin_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    if credentials.credentials != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid admin token")
-    return credentials
+    try:
+        token = credentials.credentials
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
+        
+        if not supabase_url:
+            raise HTTPException(status_code=401, detail="Supabase not configured")
+        
+        jwks_url = f"{supabase_url}/auth/v1/.well-known/jwks.json"
+        jwks_response = requests.get(jwks_url)
+        jwks_response.raise_for_status()
+        jwks = jwks_response.json()
+        
+        header = jwt.get_unverified_header(token)
+        key = None
+        for jwk in jwks['keys']:
+            if jwk['kid'] == header['kid']:
+                key = jwt.algorithms.RSAAlgorithm.from_jwk(jwk)
+                break
+        
+        if not key:
+            raise HTTPException(status_code=401, detail="Invalid token key")
+        
+        payload = jwt.decode(token, key, algorithms=[header['alg']], audience="authenticated")
+        
+        if payload.get('role') != 'authenticated':
+            raise HTTPException(status_code=401, detail="Invalid user role")
+            
+        return credentials
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
 def get_shopify_headers():
     return {

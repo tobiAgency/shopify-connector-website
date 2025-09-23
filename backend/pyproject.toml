@@ -12,6 +12,8 @@ psycopg = {extras = ["binary"], version = "^3.2.9"}
 requests = "^2.32.4"
 python-dotenv = "^1.1.1"
 shopify-python-api = "^1.0.1"
+pyjwt = "^2.8.0"
+cryptography = "^41.0.0"
 
 
 [build-system]
