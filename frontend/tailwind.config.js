@@ -19,7 +19,9 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+  			'custom-dark': '#0d546b',
+  			'custom-blue': '#9a5749'
   		},
   		keyframes: {
   			'accordion-down': {

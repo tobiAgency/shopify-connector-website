@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 export function HomePage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-custom-dark text-white">
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         <video 
@@ -16,7 +16,7 @@ export function HomePage() {
         >
           <source src="https://lgjmpmacuyfauwztwkuj.supabase.co/storage/v1/object/public/webiste//header_image.mov" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-custom-dark/40"></div>
         <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
           <h1 className="text-7xl md:text-9xl font-bold mb-6 leading-tight tracking-wider">
             MISFIT HEALTH
@@ -28,7 +28,7 @@ export function HomePage() {
       </section>
 
       {/* Promotional Banner */}
-      <section className="bg-blue-600 text-white py-4">
+      <section className="bg-custom-blue text-white py-4">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-lg font-semibold">
             🔥 Limited Time: Transform Your Business in 2025 - Join Our Exclusive Masterclass
@@ -40,7 +40,7 @@ export function HomePage() {
       </section>
 
       {/* Programs Section */}
-      <section className="py-20 bg-black">
+      <section className="py-20 bg-custom-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold text-white mb-6">Shop Natural Skincare</h2>
@@ -77,7 +77,7 @@ export function HomePage() {
                     alt={program.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  <div className="absolute inset-0 bg-custom-dark/30 group-hover:bg-custom-dark/20 transition-colors duration-300"></div>
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="text-xl font-bold">{program.title}</h3>
                     <p className="text-sm opacity-90">{program.subtitle}</p>
@@ -98,7 +98,7 @@ export function HomePage() {
                     alt="Support for Small Farmers"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  <div className="absolute inset-0 bg-custom-dark/30 group-hover:bg-custom-dark/20 transition-colors duration-300"></div>
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="text-xl font-bold">Support for Small Farmers</h3>
                     <p className="text-sm opacity-90">We work directly with small, ethical farms—strengthening local economies and communities.</p>
@@ -116,7 +116,7 @@ export function HomePage() {
                     alt="Eco-Friendly & Regenerative"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  <div className="absolute inset-0 bg-custom-dark/30 group-hover:bg-custom-dark/20 transition-colors duration-300"></div>
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="text-xl font-bold">Eco-Friendly & Regenerative</h3>
                     <p className="text-sm opacity-90">Our practices help restore ecosystems and honor the balance of nature.</p>
@@ -129,7 +129,7 @@ export function HomePage() {
       </section>
 
       {/* Master Life Section */}
-      <section className="py-20 bg-gray-900 text-white">
+      <section className="py-20 bg-custom-dark text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
             Self Mastery Tools
@@ -140,7 +140,7 @@ export function HomePage() {
           <Link to="/courses">
             <Button 
               size="lg" 
-              className="bg-blue-600 text-white hover:bg-blue-700 px-12 py-6 text-xl font-semibold rounded-full"
+              className="bg-custom-blue text-white hover:bg-custom-blue px-12 py-6 text-xl font-semibold rounded-full"
             >
               Start now
             </Button>
@@ -177,7 +177,7 @@ export function HomePage() {
       </section>
 
       {/* Celebrity Testimonials */}
-      <section className="py-20 bg-blue-600 text-white">
+      <section className="py-20 bg-custom-blue text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mb-12">
@@ -226,7 +226,7 @@ export function HomePage() {
                 className="w-full rounded-2xl"
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Button className="bg-blue-600 text-white hover:bg-blue-700 rounded-full p-4">
+                <Button className="bg-custom-blue text-white hover:bg-custom-blue rounded-full p-4">
                   <Play className="h-8 w-8" />
                 </Button>
               </div>
@@ -243,7 +243,7 @@ export function HomePage() {
               </p>
 
               <Link to="/courses">
-                <Button className="bg-gray-900 text-white hover:bg-gray-800 px-8 py-3 rounded-full">
+                <Button className="bg-custom-dark text-white hover:bg-custom-dark px-8 py-3 rounded-full">
                   Meet the Founder
                 </Button>
               </Link>
@@ -263,21 +263,21 @@ export function HomePage() {
       </section>
 
       {/* Results Section */}
-      <section className="py-20 bg-gray-900 text-white">
+      <section className="py-20 bg-custom-dark text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold mb-8">Results that speak for themselves</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="text-5xl font-bold text-blue-400 mb-2">50M+</div>
+                <div className="text-5xl font-bold text-custom-blue mb-2">50M+</div>
                 <div className="text-lg">Lives Transformed</div>
               </div>
               <div className="text-center">
-                <div className="text-5xl font-bold text-blue-400 mb-2">4M+</div>
+                <div className="text-5xl font-bold text-custom-blue mb-2">4M+</div>
                 <div className="text-lg">Event Attendees</div>
               </div>
               <div className="text-center">
-                <div className="text-5xl font-bold text-blue-400 mb-2">100+</div>
+                <div className="text-5xl font-bold text-custom-blue mb-2">100+</div>
                 <div className="text-lg">Countries Reached</div>
               </div>
             </div>
@@ -330,9 +330,9 @@ export function HomePage() {
                   </div>
                   <div className="text-gray-600 mb-4">{event.location}</div>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-blue-600">{event.price}</span>
+                    <span className="text-2xl font-bold text-custom-blue">{event.price}</span>
                     <Link to="/courses">
-                      <Button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-full">
+                      <Button className="bg-custom-blue text-white hover:bg-custom-blue px-6 py-2 rounded-full">
                         Register
                       </Button>
                     </Link>
@@ -345,7 +345,7 @@ export function HomePage() {
       </section>
 
       {/* Expert Guidance */}
-      <section className="py-20 bg-blue-600 text-white">
+      <section className="py-20 bg-custom-blue text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -364,7 +364,7 @@ export function HomePage() {
                 </div>
               </div>
               <Link to="/courses">
-                <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold">
+                <Button className="bg-white text-custom-blue hover:bg-gray-100 px-8 py-3 rounded-full font-semibold">
                   Get Coaching
                 </Button>
               </Link>
@@ -425,8 +425,8 @@ export function HomePage() {
                     <h3 className="text-lg font-bold text-gray-900 mb-2">{product.title}</h3>
                     <p className="text-gray-600 text-sm mb-4">{product.type}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-blue-600">{product.price}</span>
-                      <Button className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-full text-sm">
+                      <span className="text-xl font-bold text-custom-blue">{product.price}</span>
+                      <Button className="bg-custom-blue text-white hover:bg-custom-blue px-4 py-2 rounded-full text-sm">
                         Buy Now
                       </Button>
                     </div>
@@ -439,7 +439,7 @@ export function HomePage() {
       </section>
 
       {/* Podcast Section */}
-      <section className="py-20 bg-gray-900 text-white">
+      <section className="py-20 bg-custom-dark text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold mb-6">Latest Insights</h2>
@@ -499,7 +499,7 @@ export function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 bg-blue-600 text-white">
+      <section className="py-20 bg-custom-blue text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-tight">
             Ready to live an extraordinary life?
@@ -510,7 +510,7 @@ export function HomePage() {
           <Link to="/courses">
             <Button 
               size="lg" 
-              className="bg-white text-blue-600 hover:bg-gray-100 px-12 py-6 text-xl font-semibold rounded-full"
+              className="bg-white text-custom-blue hover:bg-gray-100 px-12 py-6 text-xl font-semibold rounded-full"
             >
               Start Your Journey
             </Button>

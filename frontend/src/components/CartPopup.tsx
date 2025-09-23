@@ -35,7 +35,7 @@ export function CartPopup({
   const total = subtotal + tax
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-custom-dark/50 backdrop-blur-sm" onClick={onClose}>
       <div 
         className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out"
         onClick={(e) => e.stopPropagation()}

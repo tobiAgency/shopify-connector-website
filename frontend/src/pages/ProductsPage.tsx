@@ -170,7 +170,7 @@ export function ProductsPage({ cartItems, onAddToCart }: ProductsPageProps) {
                       className={`w-full py-3 font-semibold rounded-full transition-all duration-300 ${
                         cartItems.includes(product.id) 
                           ? 'bg-stone-400 text-white cursor-not-allowed' 
-                          : 'bg-stone-900 hover:bg-amber-700 text-white'
+                          : 'bg-custom-dark hover:bg-amber-700 text-white'
                       }`}
                     >
                       <ShoppingCart className="h-5 w-5 mr-2" />

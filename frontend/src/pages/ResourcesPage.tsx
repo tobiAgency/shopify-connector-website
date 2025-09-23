@@ -191,7 +191,7 @@ export function ResourcesPage() {
                   </CardContent>
                   <CardFooter className="pt-0">
                     <Button 
-                      className="w-full py-3 font-semibold rounded-full bg-stone-900 hover:bg-amber-700 text-white transition-all duration-300"
+                      className="w-full py-3 font-semibold rounded-full bg-custom-dark hover:bg-amber-700 text-white transition-all duration-300"
                       onClick={() => window.open(resource.file_url, '_blank')}
                     >
                       <Download className="h-5 w-5 mr-2" />
