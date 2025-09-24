@@ -958,8 +958,8 @@ async def get_admin_company(payload: dict = Depends(verify_admin_token)):
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid user token")
             
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_key:
             raise HTTPException(status_code=500, detail="Supabase not configured")
@@ -995,8 +995,8 @@ async def get_company_config(payload: dict = Depends(verify_admin_token)):
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid user token")
             
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_key:
             raise HTTPException(status_code=500, detail="Supabase not configured")
@@ -1064,8 +1064,8 @@ async def save_company_config(request: dict, payload: dict = Depends(verify_admi
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid user token")
             
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_key:
             raise HTTPException(status_code=500, detail="Supabase not configured")
@@ -1156,8 +1156,8 @@ async def create_company(request: dict, payload: dict = Depends(verify_admin_tok
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid user token")
             
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_key:
             raise HTTPException(status_code=500, detail="Supabase not configured")
@@ -1206,8 +1206,8 @@ async def update_company(company_id: int, request: dict, payload: dict = Depends
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid user token")
             
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_key:
             raise HTTPException(status_code=500, detail="Supabase not configured")
