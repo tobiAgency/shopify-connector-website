@@ -1183,6 +1183,10 @@ async def create_company(request: dict, payload: dict = Depends(verify_admin_tok
             json=company_data
         )
         
+        print(f"DEBUG: Supabase response status: {response.status_code}")
+        print(f"DEBUG: Supabase response text: {response.text}")
+        print(f"DEBUG: Supabase response headers: {dict(response.headers)}")
+        
         if response.status_code == 201:
             company = response.json()
             return {"success": True, "company": company}
@@ -1190,6 +1194,8 @@ async def create_company(request: dict, payload: dict = Depends(verify_admin_tok
             raise HTTPException(status_code=response.status_code, detail=f"Failed to create company: {response.text}")
             
     except Exception as e:
+        print(f"DEBUG: Exception in create_company: {str(e)}")
+        print(f"DEBUG: Exception type: {type(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create company: {str(e)}")
 
 @app.put("/api/admin/company/{company_id}")
