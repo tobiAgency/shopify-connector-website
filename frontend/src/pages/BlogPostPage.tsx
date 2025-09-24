@@ -4,7 +4,7 @@ import { Calendar, User, ArrowLeft } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { BlogPost } from '../lib/supabase'
 
-const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = (import.meta as any).env.VITE_API_URL || 'https://app-ajnxmckd.fly.dev'
 
 export function BlogPostPage() {
   const { id } = useParams<{ id: string }>()

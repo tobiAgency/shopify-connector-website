@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '../components/ui/badge'
 import { Resource } from '../lib/supabase'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = import.meta.env.VITE_API_URL || 'https://app-ajnxmckd.fly.dev'
 
 export function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([])
