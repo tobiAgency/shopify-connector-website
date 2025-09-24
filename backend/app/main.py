@@ -66,8 +66,8 @@ class CheckoutRequest(BaseModel):
 def verify_admin_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=401, detail="Supabase not configured")
@@ -444,8 +444,8 @@ async def test_shopify_connection(credentials: HTTPAuthorizationCredentials = De
 async def test_supabase_connection(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Test Supabase connectivity and return detailed status"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             return {
@@ -511,8 +511,8 @@ async def test_supabase_connection(credentials: HTTPAuthorizationCredentials = D
 async def get_admin_courses(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Get all courses for admin management"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             return {"courses": []}
@@ -537,8 +537,8 @@ async def get_admin_courses(credentials: HTTPAuthorizationCredentials = Depends(
 async def get_courses():
     """Get all courses for public access"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             return {"courses": []}
@@ -563,8 +563,8 @@ async def get_courses():
 async def get_blogs():
     """Get all blog posts for public access"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             return {"blogs": []}
@@ -589,8 +589,8 @@ async def get_blogs():
 async def get_resources():
     """Get all resources for public access"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             return {"resources": []}
@@ -615,8 +615,8 @@ async def get_resources():
 async def create_course(request: CourseRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Create a new course"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         logger.info(f"Creating course with data: {request.dict()}")
         logger.info(f"Supabase URL: {supabase_url}")
@@ -657,8 +657,8 @@ async def create_course(request: CourseRequest, credentials: HTTPAuthorizationCr
 async def update_course(course_id: int, request: CourseRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Update an existing course"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
@@ -691,8 +691,8 @@ async def update_course(course_id: int, request: CourseRequest, credentials: HTT
 async def delete_course(course_id: int, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Delete a course"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
@@ -717,8 +717,8 @@ async def delete_course(course_id: int, credentials: HTTPAuthorizationCredential
 async def get_admin_blogs(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Get all blog posts for admin management"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             return {"blogs": []}
@@ -743,8 +743,8 @@ async def get_admin_blogs(credentials: HTTPAuthorizationCredentials = Depends(ve
 async def create_blog(request: BlogPostRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Create a new blog post"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
@@ -777,8 +777,8 @@ async def create_blog(request: BlogPostRequest, credentials: HTTPAuthorizationCr
 async def update_blog(blog_id: int, request: BlogPostRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Update an existing blog post"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
@@ -811,8 +811,8 @@ async def update_blog(blog_id: int, request: BlogPostRequest, credentials: HTTPA
 async def delete_blog(blog_id: int, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Delete a blog post"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
@@ -837,8 +837,8 @@ async def delete_blog(blog_id: int, credentials: HTTPAuthorizationCredentials = 
 async def get_admin_resources(credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Get all resources for admin management"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             return {"resources": []}
@@ -863,8 +863,8 @@ async def get_admin_resources(credentials: HTTPAuthorizationCredentials = Depend
 async def create_resource(request: ResourceRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Create a new resource"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
@@ -896,8 +896,8 @@ async def create_resource(request: ResourceRequest, credentials: HTTPAuthorizati
 async def update_resource(resource_id: int, request: ResourceRequest, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Update an existing resource"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
@@ -929,8 +929,8 @@ async def update_resource(resource_id: int, request: ResourceRequest, credential
 async def delete_resource(resource_id: int, credentials: HTTPAuthorizationCredentials = Depends(verify_admin_token)):
     """Delete a resource"""
     try:
-        supabase_url = os.getenv("VITE_SUPABASE_URL", "")
-        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+        supabase_url = os.getenv("VITE_SUPABASE_URL", "https://wzigrfhacakwysrqnohf.supabase.co")
+        supabase_anon_key = os.getenv("VITE_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aWdyZmhhY2Frd3lzcnFub2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NjA3MTMsImV4cCI6MjA3NDIzNjcxM30.GbhS2EQwktEwpSotjR8UrtOEIj6q53BoopmCb66FB5g")
         
         if not supabase_url or not supabase_anon_key:
             raise HTTPException(status_code=400, detail="Supabase not configured")
